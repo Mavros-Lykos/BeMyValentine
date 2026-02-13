@@ -164,8 +164,63 @@ function goToState3() {
 }
 
 function goToState4() {
-    console.log("Going to State 4 (Question)...");
-    alert("Moving to The Question (Next Commit)!");
+    document.getElementById('chatScreen').classList.add('hidden');
+    const questionScreen = document.getElementById('questionScreen');
+    questionScreen.classList.remove('hidden');
+
+    const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
+    const gifContainer = document.getElementById('pleaseGifContainer');
+
+    // No Button Logic
+    let noClickCount = 0;
+
+    noBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        noClickCount++;
+        const texts = [
+            "Are you sure? 😢",
+            "Really sure? 🥺",
+            "Think again! 😭",
+            "Last chance! 💔",
+            "You're breaking my heart...",
+            "I'm gonna cry...",
+            "Pls dont do this...",
+            "I already told my mom!"
+        ];
+
+        // 1. Move Button Randomly
+        const x = (Math.random() - 0.5) * 150;
+        const y = (Math.random() - 0.5) * 150;
+        noBtn.style.transform = `translate(${x}px, ${y}px)`;
+
+        // 2. Change Text
+        if (noClickCount <= texts.length) {
+            noBtn.innerText = texts[noClickCount - 1] || "Okay fine... 😭";
+        }
+
+        // 3. Shrink Button
+        const scale = Math.max(0.5, 1 - (noClickCount * 0.1));
+        noBtn.style.transform += ` scale(${scale})`;
+
+        // 4. Show GIF
+        gifContainer.classList.remove('hidden');
+        // Placeholder GIF - ideally replace with cute cat/puppy begging
+        gifContainer.innerHTML = `<img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3hveGJ5bTh5bTh5bTh5bTh5bTh5bTh5bTh5/L95W4wv8nimb9E6F/giphy.gif" alt="Please" style="width: 100%; max-width: 200px; border-radius: 10px;">`;
+
+        // 5. Grow GIF
+        if (noClickCount > 2) {
+            const gifScale = 1 + (noClickCount * 0.1);
+            gifContainer.querySelector('img').style.transform = `scale(${Math.min(gifScale, 2)})`;
+        }
+    });
+
+    yesBtn.addEventListener('click', goToState5);
+}
+
+function goToState5() {
+    console.log("SHE SAID YES!");
+    alert("YES! (Celebration Sequence in Next Commit)");
 }
 
 // Initialization
