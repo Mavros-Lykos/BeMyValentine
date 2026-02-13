@@ -1,6 +1,6 @@
-// BeMyValentine - Version 1.1 (Cheems Edition)
+// BeMyValentine - Version 1.2 (Structured & Gender Logic)
 
-console.log('BeMyValentine V1.1 - Cheems Mode 🐶');
+console.log('BeMyValentine V1.2 - Gender Overhaul 💖');
 
 // State & Config
 const state = {
@@ -8,19 +8,14 @@ const state = {
     userData: null
 };
 
-// Cheems/Doge GIF Collection
+// GIF Collection (Cute & Funny)
 const gifs = {
-    // Please / Begging
-    please: "https://media1.tenor.com/m/m1m2N4j4qH4AAAAd/cheems-doge.gif", // Sad Cheems looking down
-    please2: "https://media1.tenor.com/m/Z4080sY3tXUAAAAd/doge-dog.gif", // Pleading Doge
-
-    // Crying / Sad
-    crying: "https://media1.tenor.com/m/Q8yq3O1btm0AAAAd/doge-crying-doge.gif", // Crying Doge
-    cryingHard: "https://media1.tenor.com/m/3bKK7XQkPz0AAAAd/doge-sad.gif", // Very sad Cheems
-
-    // Happy / Celebration
-    celebration: "https://media1.tenor.com/m/t11-B53v0eIAAAAd/cheems-doge.gif", // Dancing/Happy Cheems
-    celebrationReal: "https://media1.tenor.com/m/63g5adPTk30AAAAd/doge-dance.gif" // Dancing Doge
+    please: "https://media1.tenor.com/m/m1m2N4j4qH4AAAAd/cheems-doge.gif",
+    please2: "https://media1.tenor.com/m/Z4080sY3tXUAAAAd/doge-dog.gif",
+    crying: "https://media1.tenor.com/m/Q8yq3O1btm0AAAAd/doge-crying-doge.gif",
+    cryingHard: "https://media1.tenor.com/m/3bKK7XQkPz0AAAAd/doge-sad.gif",
+    celebration: "https://media1.tenor.com/m/t11-B53v0eIAAAAd/cheems-doge.gif",
+    celebrationReal: "https://media1.tenor.com/m/63g5adPTk30AAAAd/doge-dance.gif"
 };
 
 // Elements
@@ -30,20 +25,8 @@ const bgMusic = document.getElementById('bgMusic');
 const musicToggle = document.getElementById('musicToggle');
 const privacyModal = document.getElementById('privacyModal');
 
-// Audio Logic (Updated Source)
-// Direct GitHub raw link can be more reliable than Pixabay for some browsers, 
-// but Pixabay should work if not hotlink blocked. switching to a generic reliable file.
-// Or we can try to use a base64 or a local file if this fails, but for now let's try a different URL.
-const AUDIO_URL = "https://raw.githubusercontent.com/sanidhyy/valentine-proposal/main/assets/music.mp3"; // Example placeholder, revert to working if needed.
-// Actually, let's use a known reliable CDN for "Romantic music" or keep the existing one if it was just an overlay issue. 
-// User said "sound is not working too". 
-// Let's try this one:
-bgMusic.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; // Test URL
-// Better one for Valentine:
-bgMusic.src = "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/7.mp3"; // Soft piano
-
+// Audio Logic 
 let isMusicPlaying = false;
-
 overlay.addEventListener('click', () => {
     overlay.style.opacity = '0';
     setTimeout(() => {
@@ -52,18 +35,11 @@ overlay.addEventListener('click', () => {
         init();
     }, 500);
 
-    // Force Play
     bgMusic.volume = 0.5;
-    const playPromise = bgMusic.play();
-    if (playPromise !== undefined) {
-        playPromise.then(() => {
-            isMusicPlaying = true;
-            musicToggle.innerHTML = '🔊';
-        }).catch(error => {
-            console.log("Audio play failed:", error);
-            musicToggle.innerHTML = '🔇';
-        });
-    }
+    bgMusic.play().then(() => {
+        isMusicPlaying = true;
+        musicToggle.innerHTML = '🔊';
+    }).catch(console.error);
 });
 
 musicToggle.addEventListener('click', () => {
@@ -102,43 +78,46 @@ function init() {
         };
         startGreeting(state.userData);
     } else {
+        // Creator Mode - No overlay update needed
         document.getElementById('greetingScreen').classList.add('d-none');
         setupWizard();
     }
 }
 
+// Update Gendered Overlay (BEFORE init)
+// We need to check params immediately to update the Overlay text while it's still visible
+(function checkGenderForOverlay() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('to') && params.has('from') && params.has('gender')) {
+        const gender = params.get('gender');
+        const overlayText = document.getElementById('overlayText');
+
+        if (gender === 'male') {
+            overlayText.innerHTML = "Hey Sir,<br>There is a mail for you... 📩";
+        } else {
+            overlayText.innerHTML = "Hey Ma'am,<br>There is a mail for you... 📩";
+        }
+    }
+})();
+
 function setupWizard() {
-    // MDB Input Init
-    document.querySelectorAll('.form-outline').forEach((formOutline) => {
-        new mdb.Input(formOutline).init();
-    });
+    document.querySelectorAll('.form-outline').forEach((formOutline) => new mdb.Input(formOutline).init());
 
     let currentStep = 1;
-
     function showStep(step) {
-        document.querySelectorAll('.wizard-step').forEach(el => {
-            el.classList.add('d-none');
-            el.classList.remove('active-step');
-        });
+        document.querySelectorAll('.wizard-step').forEach(el => { el.classList.add('d-none'); el.classList.remove('active-step'); });
         const active = document.querySelector(`.wizard-step[data-step="${step}"]`);
-        active.classList.remove('d-none');
-        active.classList.add('active-step');
+        active.classList.remove('d-none'); active.classList.add('active-step');
     }
 
     function handleNext() {
-        if (currentStep === 1 && !document.getElementById('senderName').value.trim()) return alert("Enter your name (Cheems is watching!) 🐶");
+        if (currentStep === 1 && !document.getElementById('senderName').value.trim()) return alert("Enter your name 🐶");
         if (currentStep === 2 && !document.getElementById('recipientName').value.trim()) return alert("Who is the lucky one? 🥺");
-
-        if (currentStep < 4) {
-            currentStep++;
-            showStep(currentStep);
-        }
+        if (currentStep < 4) { currentStep++; showStep(currentStep); }
     }
 
     document.querySelectorAll('.next-step-btn').forEach(btn => btn.addEventListener('click', handleNext));
-    document.querySelectorAll('.prev-step-btn').forEach(btn => btn.addEventListener('click', () => {
-        if (currentStep > 1) { currentStep--; showStep(currentStep); }
-    }));
+    document.querySelectorAll('.prev-step-btn').forEach(btn => btn.addEventListener('click', () => { if (currentStep > 1) { currentStep--; showStep(currentStep); } }));
 
     document.getElementById('generateBtn').addEventListener('click', () => {
         const sender = document.getElementById('senderName').value.trim();
@@ -160,33 +139,32 @@ function setupWizard() {
 function startGreeting(data) {
     const screen = document.getElementById('greetingScreen');
     screen.classList.remove('d-none');
-
-    // Random Cheems Welcome
-    const img = screen.querySelector('img');
-    img.src = "https://media1.tenor.com/m/Z4080sY3tXUAAAAd/doge-dog.gif"; // Shy Doge
-
     document.getElementById('greetingText').textContent = `Hi ${data.to} 💕`;
 
     setTimeout(() => {
         document.getElementById('clickHint').classList.remove('d-none');
-        document.body.addEventListener('click', startBuildUp, { once: true });
+        document.body.addEventListener('click', startBuildUp1, { once: true });
     }, 2000);
 }
 
-function startBuildUp() {
+// Build 1: "I've been wanting..."
+function startBuildUp1() {
     document.getElementById('greetingScreen').classList.add('d-none');
-    document.getElementById('buildScreen').classList.remove('d-none');
+    document.getElementById('buildScreen1').classList.remove('d-none');
 
-    setTimeout(() => document.getElementById('buildMsg1').classList.remove('d-none'), 500);
-    setTimeout(() => document.getElementById('buildMsg2').classList.remove('d-none'), 2500);
-    setTimeout(() => {
-        document.getElementById('buildHint').classList.remove('d-none');
-        document.body.addEventListener('click', startChat, { once: true });
-    }, 4500);
+    document.body.addEventListener('click', startBuildUp2, { once: true });
+}
+
+// Build 2: "But I needed courage..."
+function startBuildUp2() {
+    document.getElementById('buildScreen1').classList.add('d-none');
+    document.getElementById('buildScreen2').classList.remove('d-none');
+
+    document.body.addEventListener('click', startChat, { once: true });
 }
 
 function startChat() {
-    document.getElementById('buildScreen').classList.add('d-none');
+    document.getElementById('buildScreen2').classList.add('d-none');
     document.getElementById('chatScreen').classList.remove('d-none');
     const container = document.getElementById('chatContainer');
 
@@ -225,18 +203,15 @@ function startQuestion() {
     const noBtn = document.getElementById('noBtn');
     const yesBtn = document.getElementById('yesBtn');
     const gifContainer = document.getElementById('pleaseGifContainer');
-
     let clickCount = 0;
 
     noBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         clickCount++;
-
         const x = (Math.random() - 0.5) * 200;
         const y = (Math.random() - 0.5) * 150;
         noBtn.style.transform = `translate(${x}px, ${y}px)`;
 
-        // Show Cheems based on anger level
         gifContainer.classList.remove('d-none');
         gifContainer.classList.add('d-flex');
 
@@ -248,7 +223,6 @@ function startQuestion() {
         gifContainer.innerHTML = `<img src="${gifUrl}" class="rounded shadow-4-strong" style="width: 200px; height: 200px; object-fit: cover;">
             <p class="mt-2 fw-bold text-danger fade-in-scale">${getNoText(clickCount)}</p>`;
 
-        // Scale Buttons
         const yesScale = 1 + (clickCount * 0.3);
         yesBtn.style.transform = `scale(${Math.min(yesScale, 4)})`;
         yesBtn.style.zIndex = 100;
@@ -263,45 +237,27 @@ function startQuestion() {
 }
 
 function getNoText(count) {
-    const texts = [
-        "Pls? 🥺", "Am chimken? 🍗", "Much sad... 🐕", "Wow. Very heartbreak. 💔",
-        "Such mean. 😭", "I call police 🚓", "Why u do dis? 🥺", "Cheems cri... 🌊"
-    ];
+    const texts = ["Pls? 🥺", "Am chimken? 🍗", "Much sad... 🐕", "Wow. Very heartbreak. 💔", "Such mean. 😭", "I call police 🚓", "Why u do dis? 🥺"];
     return texts[Math.min(count - 1, texts.length - 1)];
 }
 
 function startCelebration() {
     document.getElementById('questionScreen').classList.add('d-none');
     document.getElementById('yesScreen').classList.remove('d-none');
-
     document.getElementById('celebrationGif').src = gifs.celebrationReal;
 
     const gender = state.userData.gender;
-    const name = state.userData.to; // CHANGED: Now shows recipient's name ("From" logic swapped per user request)
-    // Wait, user asked: "she said yes from should be her name.. not the creators name"
-    // "She said YES" is the title.
-    // "From [Name]" is the signature.
-    // If they want "From [Her Name]", then we use `state.userData.to`.
-    // But usually "From" implies the sender.
-    // Let's assume the user wants the signature to be the Recipient, or maybe the "She said Yes" refers to the recipient?
-    // Let's just output: "With Love, [Recipient]"?
-    // User said: "from should be her name.. not the creators name"
-    // Okay, I will set the subtext to be the Recipient's name.
-
+    const name = state.userData.to;
     document.getElementById('yesMessage').innerText = `${gender === 'female' ? 'She' : 'He'} said YES 💍💖`;
-    document.getElementById('yesSubtext').innerText = ` - ${name} ❤️`; // The Recipient's Name
+    document.getElementById('yesSubtext').innerText = ` - ${name} ❤️`;
 
     startConfetti();
 
     document.getElementById('shareAnswerBtn').addEventListener('click', () => {
         const text = `I said YES to ${state.userData.from}! 💖`;
         const url = window.location.href;
-        if (navigator.share) {
-            navigator.share({ title: 'Cheems Valentine', text: text, url: url });
-        } else {
-            alert('Link copied! 💌');
-            navigator.clipboard.writeText(`${text}\n${url}`);
-        }
+        if (navigator.share) navigator.share({ title: 'Cheems Valentine', text: text, url: url });
+        else { alert('Link copied! 💌'); navigator.clipboard.writeText(`${text}\n${url}`); }
     });
 }
 
@@ -309,7 +265,6 @@ function startConfetti() {
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
     const duration = 15 * 1000;
     const end = Date.now() + duration;
-
     (function frame() {
         const left = end - Date.now();
         if (left <= 0) return;

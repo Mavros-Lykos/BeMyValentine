@@ -21,15 +21,16 @@
 
     <!-- Click to Start Overlay (For Autoplay) -->
     <div id="overlay" class="overlay d-flex justify-content-center align-items-center">
-        <div class="text-center text-white">
-            <h1 class="display-1 bounce">💌</h1>
-            <p class="h3 mt-3">Tap to Open</p>
+        <div class="text-center text-white p-4">
+            <h1 class="display-3 mb-4">💌</h1>
+            <!-- This text will be updated by JS based on gender -->
+            <h2 id="overlayText" class="fw-bold mb-3">You have mail!</h2>
+            <p class="lead" id="tapText">Tap to Open</p>
         </div>
     </div>
 
     <div id="app"
         class="d-flex justify-content-center align-items-center min-vh-100 position-relative overflow-hidden d-none">
-        <!-- Background Elements -->
         <div class="bg-gradient"></div>
         <div class="floating-hearts"></div>
 
@@ -119,23 +120,41 @@
         <!-- State 1: Greeting -->
         <section id="greetingScreen" class="screen container text-center d-none" style="max-width: 600px; z-index: 10;">
             <div class="mb-4">
-                <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3hveGJ5bTh5bTh5bTh5bTh5bTh5bTh5bTh5/L95W4wv8nimb9E6F/giphy.gif"
-                    alt="Cute Cat" class="rounded-circle shadow-4-strong"
-                    style="width: 150px; height: 150px; object-fit: cover;">
+                <img src="https://media1.tenor.com/m/Z4080sY3tXUAAAAd/doge-dog.gif" alt="Greeting Meme"
+                    class="rounded-circle shadow-4-strong" style="width: 150px; height: 150px; object-fit: cover;">
             </div>
             <h1 id="greetingText" class="display-3 fw-bold text-main fade-in-scale">Hi... 💕</h1>
             <p id="clickHint" class="mt-4 text-muted small d-none bounce">👇 Click anywhere to continue</p>
         </section>
 
-        <!-- State 2: Emotional Build -->
-        <section id="buildScreen" class="screen container text-center d-none" style="max-width: 600px; z-index: 10;">
+        <!-- State 2: Build Screen 1 ("I've been wanting...") -->
+        <section id="buildScreen1" class="screen container text-center d-none" style="max-width: 600px; z-index: 10;">
             <div class="card glass-card">
                 <div class="card-body p-5">
-                    <p id="buildMsg1" class="h2 mb-4 text-main d-none">I’ve been wanting to tell you something…</p>
-                    <p id="buildMsg2" class="h4 text-muted d-none delay-2">But I needed a little courage first 😅</p>
+                    <div class="mb-4">
+                        <!-- Placeholder for "Shy Fingers" meme -->
+                        <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3hveGJ5bTh5bTh5bTh5bTh5bTh5bTh5bTh5/L95W4wv8nimb9E6F/giphy.gif"
+                            alt="Shy Meme" style="max-width: 150px; border-radius: 10px;">
+                    </div>
+                    <p class="h2 mb-4 text-main fw-bold">I’ve been wanting to tell you something…</p>
                 </div>
             </div>
-            <p id="buildHint" class="mt-4 text-muted small d-none bounce">👇 Click anywhere to continue</p>
+            <p class="mt-4 text-muted small bounce">👇 Click anywhere to continue</p>
+        </section>
+
+        <!-- State 2.5: Build Screen 2 ("Courage...") -->
+        <section id="buildScreen2" class="screen container text-center d-none" style="max-width: 600px; z-index: 10;">
+            <div class="card glass-card">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <!-- Placeholder for "Nervous" meme -->
+                        <img src="https://media1.tenor.com/m/m1m2N4j4qH4AAAAd/cheems-doge.gif" alt="Nervous Meme"
+                            style="max-width: 150px; border-radius: 10px;">
+                    </div>
+                    <p class="h4 text-muted">But I needed a little courage first 😅</p>
+                </div>
+            </div>
+            <p class="mt-4 text-muted small bounce">👇 Click anywhere to continue</p>
         </section>
 
         <!-- State 3: Chat Stack -->
@@ -175,8 +194,7 @@
             <div class="card glass-card border-accent">
                 <div class="card-body p-5">
                     <div class="mb-4">
-                        <img id="celebrationGif"
-                            src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3hveGJ5bTh5bTh5bTh5bTh5bTh5bTh5bTh5/L95W4wv8nimb9E6F/giphy.gif"
+                        <img id="celebrationGif" src="https://media1.tenor.com/m/t11-B53v0eIAAAAd/cheems-doge.gif"
                             class="rounded shadow-4-strong" style="max-width: 100%; max-height: 200px;">
                     </div>
                     <h1 id="yesMessage" class="display-4 fw-bold text-accent mb-3">She said YES 💍💖</h1>
@@ -216,9 +234,7 @@
 
     <!-- Audio -->
     <audio id="bgMusic" loop>
-        <source
-            src="https://cdn.pixabay.com/download/audio/2022/10/25/audio_4966d585d1.mp3?filename=romantic-piano-124936.mp3"
-            type="audio/mpeg">
+        <source src="https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/7.mp3" type="audio/mpeg">
     </audio>
 
     <!-- MDB -->
