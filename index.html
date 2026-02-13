@@ -23,10 +23,10 @@
     <div id="overlay" class="overlay d-flex justify-content-center align-items-center">
         <div class="text-center text-white p-4">
             <h1 class="display-3 mb-4">💌</h1>
-```html
+            ```html
             <h2 id="overlayText" class="fw-bold mb-3">Ready to ask your Valentine? 💖</h2>
             <p class="lead" id="tapText">Tap to create a custom surprise</p>
-```
+            ```
         </div>
     </div>
 
@@ -111,6 +111,35 @@
                             <button class="btn btn-outline-secondary btn-lg btn-rounded prev-step-btn">Back</button>
                             <button id="generateBtn" class="btn btn-primary btn-lg btn-rounded">Create Proposal
                                 💖</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Share Invitation -->
+                    <div class="wizard-step d-none" data-step="5">
+                        <h2 class="mb-4 fw-bold text-main">Your Love Letter is Ready! 💌</h2>
+                        <div class="d-flex justify-content-center mb-4">
+                            <img src="https://media1.tenor.com/m/m1m2N4j4qH4AAAAd/cheems-doge.gif"
+                                class="rounded-circle shadow-4-strong"
+                                style="width: 120px; height: 120px; object-fit: cover;">
+                        </div>
+
+                        <!-- Readonly Input -->
+                        <div class="form-outline mb-3">
+                            <input type="text" id="shareUrl" class="form-control" readonly />
+                            <label class="form-label" for="shareUrl">Your Unique Link</label>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-3">
+                            <button id="whatsappShare" class="btn btn-success btn-lg btn-rounded">
+                                <i class="fab fa-whatsapp me-2"></i> Send via WhatsApp
+                            </button>
+                            <button id="copyLinkBtn" class="btn btn-secondary btn-lg btn-rounded">
+                                <i class="fas fa-copy me-2"></i> Copy Link
+                            </button>
+                            <button id="previewBtn" class="btn btn-outline-primary btn-lg btn-rounded">
+                                <i class="fas fa-external-link-alt me-2"></i> Preview Proposal
+                            </button>
                         </div>
                     </div>
 

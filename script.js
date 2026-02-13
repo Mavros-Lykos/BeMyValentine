@@ -102,18 +102,51 @@ function setupWizard() {
     }
     document.querySelectorAll('.next-step-btn').forEach(btn => btn.addEventListener('click', handleNext));
     document.querySelectorAll('.prev-step-btn').forEach(btn => btn.addEventListener('click', () => { if (currentStep > 1) { currentStep--; showStep(currentStep); } }));
+
+    // Generate Link Logic (Step 4 -> Step 5)
     document.getElementById('generateBtn').addEventListener('click', () => {
         const sender = document.getElementById('senderName').value.trim();
         const recipient = document.getElementById('recipientName').value.trim();
         const gender = document.querySelector('input[name="gender"]:checked').value;
         const message = document.getElementById('customMessage').value.trim();
         if (!sender || !recipient) return alert("Fill everything pls!");
+
         const url = new URL(window.location.href);
         url.searchParams.set('from', sender);
         url.searchParams.set('to', recipient);
         url.searchParams.set('gender', gender);
         url.searchParams.set('msg', message);
-        window.location.href = url.toString();
+
+        const finalUrl = url.toString();
+
+        // Show Step 5
+        currentStep = 5;
+        showStep(5);
+
+        // Populate Input
+        const shareInput = document.getElementById('shareUrl');
+        shareInput.value = finalUrl;
+        new mdb.Input(shareInput.parentNode).update(); // Update label state
+
+        // WhatsApp Share
+        document.getElementById('whatsappShare').onclick = () => {
+            const text = `Hey ${recipient}! I have a secret message for you... 🤫💌\nCheck it out here: ${finalUrl}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        };
+
+        // Copy Link
+        document.getElementById('copyLinkBtn').onclick = () => {
+            shareInput.select();
+            shareInput.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(finalUrl).then(() => {
+                alert('Link copied to clipboard! 📋✨');
+            });
+        };
+
+        // Preview
+        document.getElementById('previewBtn').onclick = () => {
+            window.location.href = finalUrl;
+        };
     });
 }
 
