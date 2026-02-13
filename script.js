@@ -4,8 +4,9 @@ console.log('BeMyValentine V2 Initialized 💖');
 
 // Core Elements
 const app = document.getElementById('app');
-const mainContainer = document.getElementById('mainContainer'); // Now acts as wrapper
+const mainContainer = document.getElementById('mainContainer');
 const wizardContainer = document.getElementById('customizationWizard');
+const greetingScreen = document.getElementById('greetingScreen');
 const bgMusic = document.getElementById('bgMusic');
 const musicToggle = document.getElementById('musicToggle');
 
@@ -15,6 +16,19 @@ const state = {
     params: new URLSearchParams(window.location.search),
     userData: null
 };
+
+// Audio Handling
+let isMusicPlaying = false;
+musicToggle.addEventListener('click', () => {
+    if (isMusicPlaying) {
+        bgMusic.pause();
+        musicToggle.innerHTML = '🎵';
+    } else {
+        bgMusic.play().catch(e => console.log("Audio play failed", e));
+        musicToggle.innerHTML = '🔊';
+    }
+    isMusicPlaying = !isMusicPlaying;
+});
 
 // Wizard Logic
 function setupWizard() {
@@ -28,21 +42,13 @@ function setupWizard() {
         });
         const activeStep = document.querySelector(`.wizard-step[data-step="${step}"]`);
         activeStep.classList.remove('hidden');
-        // Small delay for animation trigger if we wanted it
         setTimeout(() => activeStep.classList.add('active'), 10);
     }
 
     document.querySelectorAll('.next-step-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            // Validation
-            if (currentStep === 1) {
-                const name = document.getElementById('senderName').value;
-                if (!name.trim()) return alert("Please enter your name! 🥺");
-            }
-            if (currentStep === 2) {
-                const name = document.getElementById('recipientName').value;
-                if (!name.trim()) return alert("Please enter their name! 💖");
-            }
+            if (currentStep === 1 && !document.getElementById('senderName').value.trim()) return alert("Please enter your name! 🥺");
+            if (currentStep === 2 && !document.getElementById('recipientName').value.trim()) return alert("Please enter their name! 💖");
 
             if (currentStep < totalSteps) {
                 currentStep++;
@@ -76,22 +82,56 @@ function setupWizard() {
     });
 }
 
+// State 1: Greeting Logic
+function setupGreeting(data) {
+    if (greetingScreen) {
+        greetingScreen.classList.remove('hidden');
+        const greetingText = document.getElementById('greetingText');
+        const hint = document.getElementById('clickHint');
+
+        greetingText.textContent = `Hi ${data.to} 💕`;
+
+        // Audio attempt
+        bgMusic.volume = 0.5;
+        bgMusic.play().then(() => {
+            musicToggle.innerHTML = '🔊';
+            isMusicPlaying = true;
+        }).catch(() => console.log("Audio waiting for interaction"));
+
+        // Timer
+        setTimeout(() => {
+            hint.classList.remove('hidden');
+            document.body.addEventListener('click', goToState2, { once: true });
+        }, 2500);
+    }
+}
+
+function goToState2() {
+    console.log("Transitioning to State 2 (Build)...");
+    // Placeholder for next commit
+    alert("Moving to Emotional Build (Next Commit)!");
+}
+
 // Initialization
 function init() {
     const params = state.params;
     if (params.has('to') && params.has('from')) {
-        // We have data -> Hide Wizard, Show Greeting (Placeholder for now)
-        if (wizardContainer) wizardContainer.classList.add('hidden');
-        mainContainer.innerHTML = `<h1>Loading Surprise... 💖</h1>`;
+        // Greeting Mode
+        if (wizardContainer) wizardContainer.remove();
+        state.userData = {
+            to: params.get('to'),
+            from: params.get('from'),
+            gender: params.get('gender'),
+            msg: params.get('msg')
+        };
+        setupGreeting(state.userData);
         console.log("Rendering Greeting Mode");
     } else {
-        // Show Wizard
-        if (wizardContainer) {
-            setupWizard();
-        }
+        // Wizard Mode
+        if (greetingScreen) greetingScreen.remove();
+        setupWizard();
         console.log("Rendering Customization Mode");
     }
 }
 
-// Start
 init();
