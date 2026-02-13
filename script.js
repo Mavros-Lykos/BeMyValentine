@@ -185,26 +185,42 @@ function setupWizard() {
     });
 }
 
+// --- STORY SCREEN TRANSITION HANDLERS ---
+function addStoryNavigation(currentScreenId, nextFunction) {
+    const handleNav = () => {
+        document.removeEventListener('keydown', handleKey);
+        nextFunction();
+    };
+    const handleKey = (e) => {
+        if (e.key === 'Enter') {
+            handleNav();
+        }
+    };
+    document.getElementById(currentScreenId).onclick = handleNav; // Touch/Click
+    document.addEventListener('keydown', handleKey, { once: true }); // Enter Key
+}
+
 function startGreeting(data) {
     const screen = document.getElementById('greetingScreen');
     screen.classList.remove('d-none');
     document.getElementById('greetingText').textContent = `Hi ${data.to} 💕`;
     setTimeout(() => {
         document.getElementById('clickHint').classList.remove('d-none');
-        document.body.addEventListener('click', startBuildUp1, { once: true });
+        // Enable Navigation
+        addStoryNavigation('greetingScreen', startBuildUp1);
     }, 2000);
 }
 
 function startBuildUp1() {
     document.getElementById('greetingScreen').classList.add('d-none');
     document.getElementById('buildScreen1').classList.remove('d-none');
-    document.body.addEventListener('click', startBuildUp2, { once: true });
+    addStoryNavigation('buildScreen1', startBuildUp2);
 }
 
 function startBuildUp2() {
     document.getElementById('buildScreen1').classList.add('d-none');
     document.getElementById('buildScreen2').classList.remove('d-none');
-    document.body.addEventListener('click', startChat, { once: true });
+    addStoryNavigation('buildScreen2', startChat);
 }
 
 function startChat() {
@@ -229,7 +245,7 @@ function startChat() {
             if (i === messages.length - 1) {
                 setTimeout(() => {
                     document.getElementById('chatHint').classList.remove('d-none');
-                    document.body.addEventListener('click', startQuestion, { once: true });
+                    addStoryNavigation('chatScreen', startQuestion);
                 }, 800);
             }
         }, delay);
