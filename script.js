@@ -1,6 +1,6 @@
-// BeMyValentine - Version 1.4 (Fixed Floating Texts)
+// BeMyValentine - Version 1.5 (GIF Fixes + Dance Animation)
 
-console.log('BeMyValentine V1.4 - Visibility Fix 💖');
+console.log('BeMyValentine V1.5 - GIF Fixes 💖');
 
 // State & Config
 const state = {
@@ -216,7 +216,6 @@ function startChat() {
     const senderName = state.userData.from;
     const recipientGender = state.userData.gender; // 'male' or 'female'
 
-
     document.getElementById('chatHeaderName').innerText = senderName;
     // Logic: If recipient is female, sender is likely male (👨), and vice versa
     const avatarEmoji = recipientGender === 'male' ? '👩' : '👨';
@@ -258,17 +257,20 @@ function startQuestion() {
     const gifContainer = document.getElementById('pleaseGifContainer');
     let clickCount = 0;
 
-    // The gifContainer already has the img tag from HTML, just get it
-    const reactionGif = gifContainer.querySelector('img');
+    // Get the existing img from HTML, or create one as fallback
+    let reactionGif = gifContainer.querySelector('img');
     if (!reactionGif) {
-        // Fallback: create if not exists
-        gifContainer.innerHTML = `<img src="${gifs.please}" id="reactionGif" class="rounded shadow-4-strong" style="width: 200px; height: 200px; object-fit: cover; transition: all 0.5s ease;">`;
+        reactionGif = document.createElement('img');
+        reactionGif.src = gifs.please;
+        reactionGif.className = 'rounded shadow-4-strong';
+        reactionGif.style.cssText = 'width: 200px; height: 200px; object-fit: cover; transition: all 0.5s ease;';
+        gifContainer.appendChild(reactionGif);
     }
 
     noBtn.addEventListener('click', (e) => {
         e.stopPropagation();
 
-        // --- NEW LOGIC: Check if we've shown all texts ---
+        // --- Check if we've shown all texts ---
         const totalTexts = 9; // Based on getNoText array length
         if (clickCount >= totalTexts) {
             // Move No Button behind Yes Button and disable interaction
@@ -296,32 +298,22 @@ function startQuestion() {
         // 1. Move Button (Random but somewhat constrained to screen)
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
-        // Increase range slightly but keep on screen
         const x = (Math.random() - 0.5) * (windowWidth * 0.8);
         const y = (Math.random() - 0.5) * (windowHeight * 0.8);
 
         noBtn.style.transform = `translate(${x}px, ${y}px)`;
-        noBtn.style.position = 'absolute'; // Ensure it can move freely
-        noBtn.style.zIndex = '1500'; // Above GIF (usually flow), below Text (2000)
+        noBtn.style.position = 'absolute';
+        noBtn.style.zIndex = '1500';
 
-        // 2. GIF Logic
+        // 2. GIF Logic - Show only please.gif and increase its size
         gifContainer.classList.remove('d-none');
         gifContainer.classList.add('d-flex');
-        reactionGif.classList.remove('d-none');
-
-        // Randomly choose between different sad GIFs
-        const sadGifs = [gifs.please, gifs.nervous, gifs.crying, gifs.sadHamster];
-        let gifUrl = sadGifs[Math.floor(Math.random() * sadGifs.length)];
-
-        // Progressively get sadder
-        if (clickCount > 3) gifUrl = Math.random() > 0.5 ? gifs.crying : gifs.sadHamster;
-        if (clickCount > 6) gifUrl = gifs.sadHamster;
-
-        reactionGif.src = gifUrl;
+        reactionGif.src = gifs.please;
+        reactionGif.style.display = 'block';
 
         const scale = 1 + (clickCount * 0.2);
         reactionGif.style.transform = `scale(${scale})`;
-        reactionGif.style.zIndex = '100'; // Below buttons
+        reactionGif.style.zIndex = '100';
 
         // 3. SPAWN FLOATING TEXT (Collision Aware)
         const text = getNoText(clickCount);
@@ -331,11 +323,11 @@ function startQuestion() {
         // 4. Yes Button Grow
         const yesScale = 1 + (clickCount * 0.4);
         yesBtn.style.transform = `scale(${Math.min(yesScale, 5)})`;
-        yesBtn.style.zIndex = 1500; // Match No button
+        yesBtn.style.zIndex = 1500;
 
         // 5. No Button Shrink
         if (clickCount > 3) {
-            const noScale = Math.max(0.2, 1 - (clickCount * 0.1)); // Don't get too small (0.2 min)
+            const noScale = Math.max(0.2, 1 - (clickCount * 0.1));
             noBtn.style.transform += ` scale(${noScale})`;
         }
     });
@@ -370,18 +362,15 @@ function spawnFloatingText(text) {
     let attempts = 0;
 
     // Viewport bounds (safe area)
-    const maxX = window.innerWidth - width - 20; // 20px padding
+    const maxX = window.innerWidth - width - 20;
     const maxY = window.innerHeight - height - 20;
     const minX = 20;
     const minY = 20;
 
     while (!safe && attempts < 50) {
-        // Random position within safe bounds
         x = Math.random() * (maxX - minX) + minX;
         y = Math.random() * (maxY - minY) + minY;
 
-        // Check collision with center box
-        // We add some buffer to the exclusion zone to avoid being right on edge
         if (x + width > excludeLeft - 20 && x < excludeRight + 20 &&
             y + height > excludeTop - 20 && y < excludeBottom + 20) {
             safe = false;
@@ -391,25 +380,12 @@ function spawnFloatingText(text) {
         attempts++;
     }
 
-    // If failed, just clamp to screen
     x = Math.max(minX, Math.min(x, maxX));
     y = Math.max(minY, Math.min(y, maxY));
 
     el.style.left = `${x}px`;
     el.style.top = `${y}px`;
-    el.style.opacity = ''; // Remove opacity override so CSS animation works based on class
-
-    // Don't duplicate append, just keep it there
-    // But we need to make sure animation runs
-    // Since it's already in DOM with opacity 0, we might need to reset animation?
-    // Actually, CSS animation 'popUp' starts on mounting usually.
-    // Let's remove and re-append or just set opacity 1.
-    // The CSS animation uses @keyframes popUp which starts at 0%
-    // To restart it, we can re-add class or just rely on new element.
-    // Since we appended it with opacity 0, the animation might be running invisibly?
-    // Let's remove the style opacity
-    // And actually, the animation popUp controls opacity.
-    // So removing inline opacity style should let the animation take over.
+    el.style.opacity = '';
 
     setTimeout(() => {
         el.remove();
@@ -428,8 +404,6 @@ function getNoText(count) {
         "Don't break my heart! 💔",
         "I'm actually crying now... 🌊"
     ];
-    // Return texts sequentially based on count (1-based index)
-    // Ensure we don't go out of bounds (though click handler should prevent it)
     const index = Math.min(count - 1, texts.length - 1);
     return texts[index];
 }
@@ -454,50 +428,61 @@ function startCelebration() {
         const text = `I said YES to ${state.userData.from}! 💖`;
         const url = window.location.href;
         if (navigator.share) navigator.share({ title: 'Valentine', text: text, url: url });
-        else { alert('Link copied! 💌'); navigator.clipboard.writeText(`${text}\\n${url}`); }
+        else { alert('Link copied! 💌'); navigator.clipboard.writeText(`${text}\n${url}`); }
     });
 }
 
 function addDancingGifs() {
-    // Create two dancing GIFs that animate from corners
-    const positions = [
-        { from: 'left', startX: '-100px', startY: '0', rotation: 30 },
-        { from: 'right', startX: 'calc(100% + 100px)', startY: '0', rotation: -30 }
-    ];
+    // Alternating dance GIFs from lower corners
+    let currentSide = 0; // 0 = left, 1 = right
 
-    positions.forEach((pos, index) => {
-        setTimeout(() => {
-            const dancer = document.createElement('img');
-            dancer.src = gifs.dance;
-            dancer.style.cssText = `
-                position: fixed;
-                width: 150px;
-                height: 150px;
-                object-fit: cover;
-                ${pos.from}: ${pos.startX};
-                top: ${pos.startY};
-                transform: rotate(${pos.rotation}deg);
-                z-index: 9999;
-                transition: all 2s ease-in-out;
-                pointer-events: none;
-            `;
+    function showNextDancer() {
+        const dancer = document.createElement('img');
+        dancer.src = gifs.dance;
+        dancer.style.position = 'fixed';
+        dancer.style.width = '150px';
+        dancer.style.height = '150px';
+        dancer.style.objectFit = 'cover';
+        dancer.style.bottom = '20px';
+        dancer.style.zIndex = '9999';
+        dancer.style.opacity = '0';
+        dancer.style.transition = 'opacity 0.5s ease-in-out';
+        dancer.style.pointerEvents = 'none';
 
-            document.body.appendChild(dancer);
+        // Alternate between left and right corners
+        if (currentSide === 0) {
+            dancer.style.left = '20px';
+            dancer.style.right = 'auto';
+        } else {
+            dancer.style.right = '20px';
+            dancer.style.left = 'auto';
+        }
 
-            // Animate to center top
-            setTimeout(() => {
-                dancer.style.left = 'calc(50% - 75px)';
-                dancer.style.top = '50px';
-                dancer.style.transform = 'rotate(0deg)';
-            }, 100);
+        document.body.appendChild(dancer);
 
-            // Remove after animation
-            setTimeout(() => {
-                dancer.style.opacity = '0';
-                setTimeout(() => dancer.remove(), 500);
-            }, 3000);
-        }, index * 500); // Stagger the animations
-    });
+        // Fade in
+        setTimeout(function () {
+            dancer.style.opacity = '1';
+        }, 100);
+
+        // Fade out after 2 seconds
+        setTimeout(function () {
+            dancer.style.opacity = '0';
+            setTimeout(function () {
+                dancer.remove();
+
+                // Switch to the other side and show next
+                currentSide = (currentSide + 1) % 2;
+                var yesScreen = document.getElementById('yesScreen');
+                if (yesScreen && !yesScreen.classList.contains('d-none')) {
+                    showNextDancer();
+                }
+            }, 500);
+        }, 2000);
+    }
+
+    // Start the alternating animation
+    showNextDancer();
 }
 
 function startConfetti() {
