@@ -4,6 +4,10 @@ A fun, personalized Valentine's Day proposal webpage! Create a unique animated e
 
 **🌐 Live Demo:** [mavros-lykos.github.io/BeMyValentine](https://mavros-lykos.github.io/BeMyValentine/)
 
+<p align="center">
+  <img src="assets/pics/willYouBeMyValentine.jpg" alt="Be My Valentine" width="500" style="border-radius: 12px;">
+</p>
+
 ---
 
 ## ✨ Features
