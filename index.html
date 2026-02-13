@@ -18,10 +18,62 @@
         <div class="bg-gradient"></div>
         <div class="floating-hearts" id="bgHearts"></div>
 
-        <!-- Main Content Area -->
-        <main id="mainContainer" class="glass-container">
-            <!-- Dynamic Content will be injected/shown here -->
-        </main>
+        <!-- State 0: Customization Wizard -->
+        <section id="customizationWizard" class="wizard-container">
+            <!-- Step 1: Sender Name -->
+            <div class="wizard-step active" data-step="1">
+                <h2>First, what's your name? 🖊️</h2>
+                <input type="text" id="senderName" placeholder="Your Name" class="input-field">
+                <button class="btn-primary next-step-btn">Next ➜</button>
+            </div>
+
+            <!-- Step 2: Recipient Name -->
+            <div class="wizard-step hidden" data-step="2">
+                <h2>And who is this special person? 💖</h2>
+                <input type="text" id="recipientName" placeholder="Their Name" class="input-field">
+                <div class="btn-group">
+                    <button class="btn-secondary prev-step-btn">Back</button>
+                    <button class="btn-primary next-step-btn">Next ➜</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Gender Selection -->
+            <div class="wizard-step hidden" data-step="3">
+                <h2>What are their pronouns/gender? ⚧</h2>
+                <div class="gender-selection">
+                    <label class="gender-option">
+                        <input type="radio" name="gender" value="male">
+                        <span class="gender-card">
+                            <span class="emoji">👨</span>
+                            <span>He/Him</span>
+                        </span>
+                    </label>
+                    <label class="gender-option">
+                        <input type="radio" name="gender" value="female" checked>
+                        <span class="gender-card">
+                            <span class="emoji">👩</span>
+                            <span>She/Her</span>
+                        </span>
+                    </label>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-secondary prev-step-btn">Back</button>
+                    <button class="btn-primary next-step-btn">Next ➜</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Custom Message -->
+            <div class="wizard-step hidden" data-step="4">
+                <h2>Add a secret message? 💌</h2>
+                <p class="subtext">(Optional) This will appear in the chat sequence.</p>
+                <textarea id="customMessage" placeholder="e.g. You make me smile every day..."
+                    class="input-field textarea-field"></textarea>
+                <div class="btn-group">
+                    <button class="btn-secondary prev-step-btn">Back</button>
+                    <button id="generateBtn" class="btn-primary">💖 Create Valentine Proposal</button>
+                </div>
+            </div>
+        </section>
 
         <!-- Footer -->
         <footer class="fade-in-up delay-3">
