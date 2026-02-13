@@ -10,12 +10,12 @@ const state = {
 
 // GIF Collection
 const gifs = {
-    please: "https://media1.tenor.com/m/m1m2N4j4qH4AAAAd/cheems-doge.gif",
-    please2: "https://media1.tenor.com/m/Z4080sY3tXUAAAAd/doge-dog.gif",
-    crying: "https://media1.tenor.com/m/Q8yq3O1btm0AAAAd/doge-crying-doge.gif",
-    cryingHard: "https://media1.tenor.com/m/3bKK7XQkPz0AAAAd/doge-sad.gif",
-    celebration: "https://media1.tenor.com/m/t11-B53v0eIAAAAd/cheems-doge.gif",
-    celebrationReal: "https://media1.tenor.com/m/63g5adPTk30AAAAd/doge-dance.gif"
+    please: "assets/gifs/please.gif",
+    nervous: "assets/gifs/nervous.gif",
+    crying: "assets/gifs/crying.gif",
+    sadHamster: "assets/gifs/sad_hamster.gif",
+    finish: "assets/gifs/finish.gif",
+    dance: "assets/gifs/dance.gif"
 };
 
 // Elements
@@ -258,8 +258,12 @@ function startQuestion() {
     const gifContainer = document.getElementById('pleaseGifContainer');
     let clickCount = 0;
 
-    gifContainer.innerHTML = `<img src="${gifs.please}" id="reactionGif" class="rounded shadow-4-strong d-none" style="width: 200px; height: 200px; object-fit: cover; transition: all 0.5s ease;">`;
-    const reactionGif = document.getElementById('reactionGif');
+    // The gifContainer already has the img tag from HTML, just get it
+    const reactionGif = gifContainer.querySelector('img');
+    if (!reactionGif) {
+        // Fallback: create if not exists
+        gifContainer.innerHTML = `<img src="${gifs.please}" id="reactionGif" class="rounded shadow-4-strong" style="width: 200px; height: 200px; object-fit: cover; transition: all 0.5s ease;">`;
+    }
 
     noBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -305,10 +309,14 @@ function startQuestion() {
         gifContainer.classList.add('d-flex');
         reactionGif.classList.remove('d-none');
 
-        let gifUrl = gifs.please;
-        if (clickCount > 2) gifUrl = gifs.please2;
-        if (clickCount > 5) gifUrl = gifs.crying;
-        if (clickCount > 8) gifUrl = gifs.cryingHard;
+        // Randomly choose between different sad GIFs
+        const sadGifs = [gifs.please, gifs.nervous, gifs.crying, gifs.sadHamster];
+        let gifUrl = sadGifs[Math.floor(Math.random() * sadGifs.length)];
+
+        // Progressively get sadder
+        if (clickCount > 3) gifUrl = Math.random() > 0.5 ? gifs.crying : gifs.sadHamster;
+        if (clickCount > 6) gifUrl = gifs.sadHamster;
+
         reactionGif.src = gifUrl;
 
         const scale = 1 + (clickCount * 0.2);
@@ -429,7 +437,7 @@ function getNoText(count) {
 function startCelebration() {
     document.getElementById('questionScreen').classList.add('d-none');
     document.getElementById('yesScreen').classList.remove('d-none');
-    document.getElementById('celebrationGif').src = gifs.celebrationReal;
+    document.getElementById('celebrationGif').src = gifs.finish;
 
     const gender = state.userData.gender;
     const name = state.userData.to;
@@ -439,11 +447,56 @@ function startCelebration() {
     startConfetti();
     document.querySelectorAll('.pop-text').forEach(el => el.remove());
 
+    // Add dancing GIFs from corners
+    addDancingGifs();
+
     document.getElementById('shareAnswerBtn').addEventListener('click', () => {
         const text = `I said YES to ${state.userData.from}! 💖`;
         const url = window.location.href;
         if (navigator.share) navigator.share({ title: 'Valentine', text: text, url: url });
-        else { alert('Link copied! 💌'); navigator.clipboard.writeText(`${text}\n${url}`); }
+        else { alert('Link copied! 💌'); navigator.clipboard.writeText(`${text}\\n${url}`); }
+    });
+}
+
+function addDancingGifs() {
+    // Create two dancing GIFs that animate from corners
+    const positions = [
+        { from: 'left', startX: '-100px', startY: '0', rotation: 30 },
+        { from: 'right', startX: 'calc(100% + 100px)', startY: '0', rotation: -30 }
+    ];
+
+    positions.forEach((pos, index) => {
+        setTimeout(() => {
+            const dancer = document.createElement('img');
+            dancer.src = gifs.dance;
+            dancer.style.cssText = `
+                position: fixed;
+                width: 150px;
+                height: 150px;
+                object-fit: cover;
+                ${pos.from}: ${pos.startX};
+                top: ${pos.startY};
+                transform: rotate(${pos.rotation}deg);
+                z-index: 9999;
+                transition: all 2s ease-in-out;
+                pointer-events: none;
+            `;
+
+            document.body.appendChild(dancer);
+
+            // Animate to center top
+            setTimeout(() => {
+                dancer.style.left = 'calc(50% - 75px)';
+                dancer.style.top = '50px';
+                dancer.style.transform = 'rotate(0deg)';
+            }, 100);
+
+            // Remove after animation
+            setTimeout(() => {
+                dancer.style.opacity = '0';
+                setTimeout(() => dancer.remove(), 500);
+            }, 3000);
+        }, index * 500); // Stagger the animations
     });
 }
 
