@@ -199,13 +199,21 @@ function startGreeting(data) {
 function startBuildUp1() {
     document.getElementById('greetingScreen').classList.add('d-none');
     document.getElementById('buildScreen1').classList.remove('d-none');
-    addStoryNavigation('buildScreen1', startBuildUp2);
+    // Wait 3 seconds before enabling navigation to prevent accidental clicks
+    setTimeout(() => {
+        document.getElementById('clickHint1').classList.remove('d-none');
+        addStoryNavigation('buildScreen1', startBuildUp2);
+    }, 3000);
 }
 
 function startBuildUp2() {
     document.getElementById('buildScreen1').classList.add('d-none');
     document.getElementById('buildScreen2').classList.remove('d-none');
-    addStoryNavigation('buildScreen2', startChat);
+    // Wait 3 seconds before enabling navigation to prevent accidental clicks
+    setTimeout(() => {
+        document.getElementById('clickHint2').classList.remove('d-none');
+        addStoryNavigation('buildScreen2', startChat);
+    }, 3000);
 }
 
 function startChat() {
