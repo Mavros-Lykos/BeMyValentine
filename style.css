@@ -140,11 +140,13 @@ h6,
 
 /* Chat */
 .chat-container {
-    height: 350px;
+    height: 300px;
+    /* Reduced slightly to accommodate header */
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
+    /* Reduced gap */
     padding-right: 5px;
 }
 
