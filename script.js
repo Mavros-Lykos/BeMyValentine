@@ -1,6 +1,6 @@
-// BeMyValentine - Version 1.6 (Share Buttons Fix)
+// BeMyValentine - Version 1.7 (Counters + Share Fix)
 
-console.log('BeMyValentine V1.6 - Share Fix 💖');
+console.log('BeMyValentine V1.7 - Counters 💖');
 
 // State & Config
 const state = {
@@ -71,6 +71,8 @@ function init() {
             msg: params.get('msg')
         };
         startGreeting(state.userData);
+        // Track proposal view
+        incrementCounter('viewed');
     } else {
         document.getElementById('greetingScreen').classList.add('d-none');
         setupWizard();
@@ -122,6 +124,9 @@ function setupWizard() {
         // Show Step 5
         currentStep = 5;
         showStep(5);
+
+        // Track proposal sent
+        incrementCounter('sent');
 
         // Populate Input
         const shareInput = document.getElementById('shareUrl');
@@ -511,3 +516,49 @@ function startConfetti() {
         requestAnimationFrame(frame);
     }());
 }
+
+/* ===========================
+   COUNTER API (counterapi.dev)
+   =========================== */
+
+const COUNTER_NAMESPACE = 'bemyvalentine-mavros';
+const COUNTER_API = 'https://api.counterapi.dev/v1';
+
+function incrementCounter(key) {
+    fetch(`${COUNTER_API}/${COUNTER_NAMESPACE}/${key}/up`)
+        .then(res => res.json())
+        .then(data => {
+            const el = document.getElementById(key === 'sent' ? 'sentCount' : 'viewedCount');
+            if (el && data.count !== undefined) el.textContent = data.count;
+        })
+        .catch(err => console.warn('Counter error:', err));
+}
+
+function fetchCounters() {
+    // Fetch sent count
+    fetch(`${COUNTER_API}/${COUNTER_NAMESPACE}/sent`)
+        .then(res => res.json())
+        .then(data => {
+            const el = document.getElementById('sentCount');
+            if (el && data.count !== undefined) el.textContent = data.count;
+        })
+        .catch(() => {
+            const el = document.getElementById('sentCount');
+            if (el) el.textContent = '0';
+        });
+
+    // Fetch viewed count
+    fetch(`${COUNTER_API}/${COUNTER_NAMESPACE}/viewed`)
+        .then(res => res.json())
+        .then(data => {
+            const el = document.getElementById('viewedCount');
+            if (el && data.count !== undefined) el.textContent = data.count;
+        })
+        .catch(() => {
+            const el = document.getElementById('viewedCount');
+            if (el) el.textContent = '0';
+        });
+}
+
+// Load counters on page load
+fetchCounters();
