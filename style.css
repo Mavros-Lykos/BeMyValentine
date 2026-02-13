@@ -152,3 +152,135 @@ footer {
 .icon-btn:hover {
     transform: scale(1.1);
 }
+
+/* Wizard Styles */
+.wizard-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.wizard-step {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    animation: fadeInSlide 0.5s ease-out;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.active {
+    display: flex !important;
+}
+
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+h2 {
+    font-family: var(--font-heading);
+    color: var(--color-text-main);
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.subtext {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.input-field {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #ffeff7;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-family: var(--font-body);
+    background: rgba(255, 255, 255, 0.9);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 4px rgba(251, 111, 146, 0.2);
+}
+
+.textarea-field {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.btn-group {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    justify-content: center;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 2px solid var(--color-text-light);
+    color: var(--color-text-light);
+    padding: 10px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* Gender Selection */
+.gender-selection {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+}
+
+.gender-option input {
+    display: none;
+}
+
+.gender-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 25px;
+    background: white;
+    border: 2px solid transparent;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.gender-card .emoji {
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+.gender-option input:checked+.gender-card {
+    border-color: var(--color-accent);
+    background: #fff0f5;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(251, 111, 146, 0.2);
+}
