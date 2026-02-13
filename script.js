@@ -107,9 +107,65 @@ function setupGreeting(data) {
 }
 
 function goToState2() {
-    console.log("Transitioning to State 2 (Build)...");
-    // Placeholder for next commit
-    alert("Moving to Emotional Build (Next Commit)!");
+    greetingScreen.classList.add('hidden');
+
+    const buildScreen = document.getElementById('buildScreen');
+    const msg1 = document.getElementById('buildMsg1');
+    const msg2 = document.getElementById('buildMsg2');
+    const hint = document.getElementById('buildHint');
+
+    if (buildScreen) {
+        buildScreen.classList.remove('hidden');
+
+        // Sequence
+        setTimeout(() => msg1.classList.remove('hidden'), 500);
+        setTimeout(() => msg2.classList.remove('hidden'), 2500);
+
+        // Hint
+        setTimeout(() => {
+            hint.classList.remove('hidden');
+            document.body.addEventListener('click', goToState3, { once: true });
+        }, 4500);
+    }
+}
+
+function goToState3() {
+    document.getElementById('buildScreen').classList.add('hidden');
+    const chatScreen = document.getElementById('chatScreen');
+    const chatContainer = document.getElementById('chatContainer');
+    chatScreen.classList.remove('hidden');
+
+    const messages = [
+        { text: "You know something? 🥺", side: "left" },
+        { text: "You make my days brighter.", side: "right" },
+        { text: "I smile more because of you.", side: "left" },
+        { text: state.userData.msg || "You are special to me.", side: "right" },
+        { text: "So I was thinking…", side: "left" }
+    ];
+
+    let delay = 500;
+    messages.forEach((msg, i) => {
+        setTimeout(() => {
+            const bubble = document.createElement('div');
+            bubble.classList.add('chat-bubble', msg.side === 'left' ? 'bubble-left' : 'bubble-right');
+            bubble.innerText = msg.text;
+            chatContainer.appendChild(bubble);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            if (i === messages.length - 1) {
+                setTimeout(() => {
+                    document.getElementById('chatHint').classList.remove('hidden');
+                    document.body.addEventListener('click', goToState4, { once: true });
+                }, 1000);
+            }
+        }, delay);
+        delay += 2000;
+    });
+}
+
+function goToState4() {
+    console.log("Going to State 4 (Question)...");
+    alert("Moving to The Question (Next Commit)!");
 }
 
 // Initialization
