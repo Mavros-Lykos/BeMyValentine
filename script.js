@@ -103,34 +103,7 @@ function setupWizard() {
     document.querySelectorAll('.next-step-btn').forEach(btn => btn.addEventListener('click', handleNext));
     document.querySelectorAll('.prev-step-btn').forEach(btn => btn.addEventListener('click', () => { if (currentStep > 1) { currentStep--; showStep(currentStep); } }));
 
-    // --- UNIFIED ENTER KEY NAVIGATION ---
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault(); // Prevent default framing/form submission
 
-            // 1. OVERLAY (Start Screen)
-            const overlay = document.getElementById('overlay');
-            if (!overlay.classList.contains('d-none')) {
-                overlay.click();
-                return;
-            }
-
-            // 2. WIZARD NAVIGATION
-            const wizard = document.getElementById('customizationWizard');
-            if (!wizard.classList.contains('d-none')) {
-                // If we are in the wizard, logic depends on the step
-                // We access the `currentStep` variable from the closure if possible, 
-                // but since this is global, we might need to rely on the active step class.
-                // However, `currentStep` is inside `setupWizard`. 
-                // Let's move this logic INSIDE setupWizard so it closes over `currentStep`.
-                return;
-            }
-
-            // 3. STORY MODE (Wizard Hidden)
-            // Simulates clicking anywhere on the body to progress the story
-            document.body.click();
-        }
-    });
 
     // Generate Link Logic (Step 4 -> Step 5)
     document.getElementById('generateBtn').addEventListener('click', () => {
@@ -185,6 +158,18 @@ function setupWizard() {
     });
 }
 
+// Global Enter Key Listener (Runs everywhere)
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        // 1. OVERLAY (Start Screen)
+        const overlay = document.getElementById('overlay');
+        if (!overlay.classList.contains('d-none')) {
+            overlay.click();
+            e.preventDefault();
+        }
+    }
+});
+
 // --- STORY SCREEN TRANSITION HANDLERS ---
 function addStoryNavigation(currentScreenId, nextFunction) {
     const handleNav = () => {
@@ -228,11 +213,11 @@ function startChat() {
     document.getElementById('chatScreen').classList.remove('d-none');
     const container = document.getElementById('chatContainer');
     const messages = [
-        { text: "Hewwo... 🥺", side: "left" },
+        { text: "Hewwo... 🥺", side: "right" },
         { text: "Can I ask something?", side: "right" },
-        { text: "It's impawtant...", side: "left" },
+        { text: "It's impawtant...", side: "right" },
         { text: state.userData.msg || "You mean the world to me.", side: "right" },
-        { text: "So...", side: "left" }
+        { text: "So...", side: "right" }
     ];
     let delay = 300;
     messages.forEach((msg, i) => {
