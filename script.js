@@ -1,6 +1,6 @@
-// BeMyValentine - Version 1.5 (GIF Fixes + Dance Animation)
+// BeMyValentine - Version 1.6 (Share Buttons Fix)
 
-console.log('BeMyValentine V1.5 - GIF Fixes 💖');
+console.log('BeMyValentine V1.6 - Share Fix 💖');
 
 // State & Config
 const state = {
@@ -103,8 +103,6 @@ function setupWizard() {
     document.querySelectorAll('.next-step-btn').forEach(btn => btn.addEventListener('click', handleNext));
     document.querySelectorAll('.prev-step-btn').forEach(btn => btn.addEventListener('click', () => { if (currentStep > 1) { currentStep--; showStep(currentStep); } }));
 
-
-
     // Generate Link Logic (Step 4 -> Step 5)
     document.getElementById('generateBtn').addEventListener('click', () => {
         const sender = document.getElementById('senderName').value.trim();
@@ -128,7 +126,7 @@ function setupWizard() {
         // Populate Input
         const shareInput = document.getElementById('shareUrl');
         shareInput.value = finalUrl;
-        new mdb.Input(shareInput.parentNode).update(); // Update label state
+        new mdb.Input(shareInput.parentNode).update();
 
         // WhatsApp Share
         document.getElementById('whatsappShare').onclick = () => {
@@ -136,10 +134,14 @@ function setupWizard() {
             window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
         };
 
+        // Telegram Share
+        document.getElementById('telegramShare').onclick = () => {
+            const text = `Hey ${recipient}! I have a secret message for you... 🤫💌`;
+            window.open(`https://t.me/share/url?url=${encodeURIComponent(finalUrl)}&text=${encodeURIComponent(text)}`, '_blank');
+        };
+
         // Copy Link
         document.getElementById('copyLinkBtn').onclick = () => {
-            shareInput.select();
-            shareInput.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(finalUrl).then(() => {
                 alert('Link copied to clipboard! 📋✨');
             });
@@ -149,7 +151,7 @@ function setupWizard() {
         document.getElementById('previewBtn').onclick = () => finalUrl ? window.location.href = finalUrl : null;
     });
 
-    // Internal Enter Key Logic for Wizard (Closure access to currentStep/handleNext)
+    // Internal Enter Key Logic for Wizard
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !document.getElementById('customizationWizard').classList.contains('d-none')) {
             if (currentStep === 4) document.getElementById('generateBtn').click();
@@ -158,10 +160,9 @@ function setupWizard() {
     });
 }
 
-// Global Enter Key Listener (Runs everywhere)
+// Global Enter Key Listener
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
-        // 1. OVERLAY (Start Screen)
         const overlay = document.getElementById('overlay');
         if (!overlay.classList.contains('d-none')) {
             overlay.click();
@@ -181,8 +182,8 @@ function addStoryNavigation(currentScreenId, nextFunction) {
             handleNav();
         }
     };
-    document.getElementById(currentScreenId).onclick = handleNav; // Touch/Click
-    document.addEventListener('keydown', handleKey, { once: true }); // Enter Key
+    document.getElementById(currentScreenId).onclick = handleNav;
+    document.addEventListener('keydown', handleKey, { once: true });
 }
 
 function startGreeting(data) {
@@ -191,7 +192,6 @@ function startGreeting(data) {
     document.getElementById('greetingText').textContent = `Hi ${data.to} 💕`;
     setTimeout(() => {
         document.getElementById('clickHint').classList.remove('d-none');
-        // Enable Navigation
         addStoryNavigation('greetingScreen', startBuildUp1);
     }, 2000);
 }
@@ -222,10 +222,9 @@ function startChat() {
 
     // --- POPULATE CHAT HEADER ---
     const senderName = state.userData.from;
-    const recipientGender = state.userData.gender; // 'male' or 'female'
+    const recipientGender = state.userData.gender;
 
     document.getElementById('chatHeaderName').innerText = senderName;
-    // Logic: If recipient is female, sender is likely male (👨), and vice versa
     const avatarEmoji = recipientGender === 'male' ? '👩' : '👨';
     document.getElementById('chatAvatar').innerText = avatarEmoji;
 
@@ -265,7 +264,6 @@ function startQuestion() {
     const gifContainer = document.getElementById('pleaseGifContainer');
     let clickCount = 0;
 
-    // Get the existing img from HTML, or create one as fallback
     let reactionGif = gifContainer.querySelector('img');
     if (!reactionGif) {
         reactionGif = document.createElement('img');
@@ -278,32 +276,23 @@ function startQuestion() {
     noBtn.addEventListener('click', (e) => {
         e.stopPropagation();
 
-        // --- Check if we've shown all texts ---
-        const totalTexts = 9; // Based on getNoText array length
+        const totalTexts = 9;
         if (clickCount >= totalTexts) {
-            // Move No Button behind Yes Button and disable interaction
             const yesRect = yesBtn.getBoundingClientRect();
-
-            // Use fixed positioning to guarantee exact overlap regardless of container context
             noBtn.style.position = 'fixed';
             noBtn.style.left = (yesRect.left + yesRect.width / 2) + 'px';
             noBtn.style.top = (yesRect.top + yesRect.height / 2) + 'px';
-
-            // Center it and shrink to 0
             noBtn.style.transform = 'translate(-50%, -50%) scale(0)';
             noBtn.style.transition = 'all 0.5s ease';
-
             noBtn.style.zIndex = '-1';
             noBtn.style.opacity = '0';
             noBtn.disabled = true;
             noBtn.style.pointerEvents = 'none';
-
             return;
         }
 
         clickCount++;
 
-        // 1. Move Button (Random but somewhat constrained to screen)
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
         const x = (Math.random() - 0.5) * (windowWidth * 0.8);
@@ -313,7 +302,7 @@ function startQuestion() {
         noBtn.style.position = 'absolute';
         noBtn.style.zIndex = '1500';
 
-        // 2. GIF Logic - Show only please.gif and increase its size
+        // Show only please.gif and increase its size
         gifContainer.classList.remove('d-none');
         gifContainer.classList.add('d-flex');
         reactionGif.src = gifs.please;
@@ -323,17 +312,14 @@ function startQuestion() {
         reactionGif.style.transform = `scale(${scale})`;
         reactionGif.style.zIndex = '100';
 
-        // 3. SPAWN FLOATING TEXT (Collision Aware)
         const text = getNoText(clickCount);
         console.log("Spawning text:", text);
         spawnFloatingText(text);
 
-        // 4. Yes Button Grow
         const yesScale = 1 + (clickCount * 0.4);
         yesBtn.style.transform = `scale(${Math.min(yesScale, 5)})`;
         yesBtn.style.zIndex = 1500;
 
-        // 5. No Button Shrink
         if (clickCount > 3) {
             const noScale = Math.max(0.2, 1 - (clickCount * 0.1));
             noBtn.style.transform += ` scale(${noScale})`;
@@ -348,14 +334,12 @@ function spawnFloatingText(text) {
     el.innerText = text;
     el.className = 'pop-text';
 
-    // Initial invisible append to measure size
     el.style.opacity = '0';
     document.body.appendChild(el);
 
     const width = el.offsetWidth;
     const height = el.offsetHeight;
 
-    // Get exclusion zone (The main card/content area)
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
     const excludeWidth = Math.min(600, window.innerWidth * 0.8);
@@ -369,7 +353,6 @@ function spawnFloatingText(text) {
     let x, y, safe = false;
     let attempts = 0;
 
-    // Viewport bounds (safe area)
     const maxX = window.innerWidth - width - 20;
     const maxY = window.innerHeight - height - 20;
     const minX = 20;
@@ -410,7 +393,7 @@ function getNoText(count) {
         "I already practiced telling my mom 😭",
         "But we'd look so cute together! 🧸",
         "Don't break my heart! 💔",
-        "I'm actually crying now... 🌊"
+        "Don't make me cry now... 🌊"
     ];
     const index = Math.min(count - 1, texts.length - 1);
     return texts[index];
@@ -432,17 +415,47 @@ function startCelebration() {
     // Add dancing GIFs from corners
     addDancingGifs();
 
-    document.getElementById('shareAnswerBtn').addEventListener('click', () => {
-        const text = `I said YES to ${state.userData.from}! 💖`;
-        const url = window.location.href;
-        if (navigator.share) navigator.share({ title: 'Valentine', text: text, url: url });
-        else { alert('Link copied! 💌'); navigator.clipboard.writeText(`${text}\n${url}`); }
+    // --- Share Answer Section (shares the current YES screen URL) ---
+    const answerUrl = window.location.href;
+    const answerText = `I said YES to ${state.userData.from}! 💖`;
+
+    document.getElementById('shareAnswerWhatsApp').addEventListener('click', () => {
+        const msg = `${answerText}\nSee for yourself: ${answerUrl}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    });
+
+    document.getElementById('shareAnswerTelegram').addEventListener('click', () => {
+        window.open(`https://t.me/share/url?url=${encodeURIComponent(answerUrl)}&text=${encodeURIComponent(answerText)}`, '_blank');
+    });
+
+    document.getElementById('shareAnswerCopy').addEventListener('click', () => {
+        navigator.clipboard.writeText(answerUrl).then(() => {
+            alert('Link copied! 📋✨');
+        });
+    });
+
+    // --- Share Site Section (shares the base site URL for friends) ---
+    const siteUrl = 'https://mavros-lykos.github.io/BeMyValentine/';
+    const siteText = 'Try this fun Valentine\'s Day page! Ask your special someone 💖';
+
+    document.getElementById('shareSiteWhatsApp').addEventListener('click', () => {
+        const msg = `${siteText}\nCheck it out: ${siteUrl}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    });
+
+    document.getElementById('shareSiteTelegram').addEventListener('click', () => {
+        window.open(`https://t.me/share/url?url=${encodeURIComponent(siteUrl)}&text=${encodeURIComponent(siteText)}`, '_blank');
+    });
+
+    document.getElementById('shareSiteCopy').addEventListener('click', () => {
+        navigator.clipboard.writeText(siteUrl).then(() => {
+            alert('Link copied! 📋✨');
+        });
     });
 }
 
 function addDancingGifs() {
-    // Alternating dance GIFs from lower corners
-    let currentSide = 0; // 0 = left, 1 = right
+    let currentSide = 0;
 
     function showNextDancer() {
         const dancer = document.createElement('img');
@@ -457,7 +470,6 @@ function addDancingGifs() {
         dancer.style.transition = 'opacity 0.5s ease-in-out';
         dancer.style.pointerEvents = 'none';
 
-        // Alternate between left and right corners
         if (currentSide === 0) {
             dancer.style.left = '20px';
             dancer.style.right = 'auto';
@@ -468,18 +480,14 @@ function addDancingGifs() {
 
         document.body.appendChild(dancer);
 
-        // Fade in
         setTimeout(function () {
             dancer.style.opacity = '1';
         }, 100);
 
-        // Fade out after 2 seconds
         setTimeout(function () {
             dancer.style.opacity = '0';
             setTimeout(function () {
                 dancer.remove();
-
-                // Switch to the other side and show next
                 currentSide = (currentSide + 1) % 2;
                 var yesScreen = document.getElementById('yesScreen');
                 if (yesScreen && !yesScreen.classList.contains('d-none')) {
@@ -489,7 +497,6 @@ function addDancingGifs() {
         }, 2000);
     }
 
-    // Start the alternating animation
     showNextDancer();
 }
 
