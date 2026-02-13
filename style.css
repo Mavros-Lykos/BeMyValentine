@@ -178,7 +178,7 @@ footer {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 25px;
     animation: fadeInSlide 0.5s ease-out;
 }
 
@@ -197,12 +197,14 @@ footer {
 h2 {
     font-family: var(--font-heading);
     color: var(--color-text-main);
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     text-align: center;
+    font-size: 1.8rem;
+    /* Increased size */
 }
 
 .subtext {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--color-text-light);
     margin-bottom: 10px;
     text-align: center;
@@ -210,23 +212,28 @@ h2 {
 
 .input-field {
     width: 100%;
-    padding: 15px;
-    border: 2px solid #ffeff7;
-    border-radius: 12px;
-    font-size: 1.1rem;
+    padding: 18px 20px;
+    /* Larger padding */
+    border: 3px solid #ffeff7;
+    /* Thicker border */
+    border-radius: 16px;
+    font-size: 1.3rem;
+    /* Larger font */
     font-family: var(--font-body);
-    background: rgba(255, 255, 255, 0.9);
-    transition: border-color 0.3s, box-shadow 0.3s;
+    background: rgba(255, 255, 255, 0.95);
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .input-field:focus {
     outline: none;
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 4px rgba(251, 111, 146, 0.2);
+    box-shadow: 0 0 0 4px rgba(251, 111, 146, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
 }
 
 .textarea-field {
-    min-height: 100px;
+    min-height: 120px;
     resize: vertical;
 }
 
@@ -241,23 +248,26 @@ h2 {
     background: transparent;
     border: 2px solid var(--color-text-light);
     color: var(--color-text-light);
-    padding: 10px 24px;
+    padding: 12px 30px;
     border-radius: 50px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
+    font-size: 1rem;
 }
 
 .btn-secondary:hover {
     background: rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
 }
 
-/* Gender Selection */
+/* Gender Selection - 3D Cards */
 .gender-selection {
     display: flex;
-    gap: 20px;
+    gap: 30px;
     width: 100%;
     justify-content: center;
+    perspective: 1000px;
 }
 
 .gender-option input {
@@ -268,25 +278,43 @@ h2 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 15px 25px;
+    padding: 20px 30px;
     background: white;
-    border: 2px solid transparent;
-    border-radius: 16px;
+    border: 3px solid transparent;
+    border-radius: 20px;
     cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    transform-style: preserve-3d;
 }
 
 .gender-card .emoji {
-    font-size: 2rem;
-    margin-bottom: 5px;
+    font-size: 3rem;
+    /* Larger emoji */
+    margin-bottom: 10px;
+    transition: transform 0.3s;
+}
+
+.gender-card span:last-child {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-text-light);
+}
+
+.gender-option:hover .gender-card {
+    transform: translateY(-5px) rotateX(5deg);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
 }
 
 .gender-option input:checked+.gender-card {
     border-color: var(--color-accent);
     background: #fff0f5;
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(251, 111, 146, 0.2);
+    transform: translateY(-10px) scale(1.05) rotateX(0);
+    box-shadow: 0 20px 40px rgba(251, 111, 146, 0.3);
+}
+
+.gender-option input:checked+.gender-card .emoji {
+    transform: scale(1.2);
 }
 
 /* Greeting State */
