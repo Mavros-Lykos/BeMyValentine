@@ -211,6 +211,17 @@ function startBuildUp2() {
 function startChat() {
     document.getElementById('buildScreen2').classList.add('d-none');
     document.getElementById('chatScreen').classList.remove('d-none');
+
+    // --- POPULATE CHAT HEADER ---
+    const senderName = state.userData.from;
+    const recipientGender = state.userData.gender; // 'male' or 'female'
+
+
+    document.getElementById('chatHeaderName').innerText = senderName;
+    // Logic: If recipient is female, sender is likely male (👨), and vice versa
+    const avatarEmoji = recipientGender === 'male' ? '👩' : '👨';
+    document.getElementById('chatAvatar').innerText = avatarEmoji;
+
     const container = document.getElementById('chatContainer');
     const messages = [
         { text: "Hewwo... 🥺", side: "right" },
@@ -252,14 +263,42 @@ function startQuestion() {
 
     noBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+
+        // --- NEW LOGIC: Check if we've shown all texts ---
+        const totalTexts = 9; // Based on getNoText array length
+        if (clickCount >= totalTexts) {
+            // Move No Button behind Yes Button and disable interaction
+            const yesRect = yesBtn.getBoundingClientRect();
+
+            // Use fixed positioning to guarantee exact overlap regardless of container context
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = (yesRect.left + yesRect.width / 2) + 'px';
+            noBtn.style.top = (yesRect.top + yesRect.height / 2) + 'px';
+
+            // Center it and shrink to 0
+            noBtn.style.transform = 'translate(-50%, -50%) scale(0)';
+            noBtn.style.transition = 'all 0.5s ease';
+
+            noBtn.style.zIndex = '-1';
+            noBtn.style.opacity = '0';
+            noBtn.disabled = true;
+            noBtn.style.pointerEvents = 'none';
+
+            return;
+        }
+
         clickCount++;
 
-        // 1. Move Button
+        // 1. Move Button (Random but somewhat constrained to screen)
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
-        const x = (Math.random() - 0.5) * (windowWidth * 0.6);
-        const y = (Math.random() - 0.5) * (windowHeight * 0.6);
+        // Increase range slightly but keep on screen
+        const x = (Math.random() - 0.5) * (windowWidth * 0.8);
+        const y = (Math.random() - 0.5) * (windowHeight * 0.8);
+
         noBtn.style.transform = `translate(${x}px, ${y}px)`;
+        noBtn.style.position = 'absolute'; // Ensure it can move freely
+        noBtn.style.zIndex = '1500'; // Above GIF (usually flow), below Text (2000)
 
         // 2. GIF Logic
         gifContainer.classList.remove('d-none');
@@ -274,20 +313,21 @@ function startQuestion() {
 
         const scale = 1 + (clickCount * 0.2);
         reactionGif.style.transform = `scale(${scale})`;
+        reactionGif.style.zIndex = '100'; // Below buttons
 
-        // 3. SPAWN FLOATING TEXT (The Crucial Part)
+        // 3. SPAWN FLOATING TEXT (Collision Aware)
         const text = getNoText(clickCount);
-        console.log("Spawning text:", text); // Debug
+        console.log("Spawning text:", text);
         spawnFloatingText(text);
 
         // 4. Yes Button Grow
         const yesScale = 1 + (clickCount * 0.4);
         yesBtn.style.transform = `scale(${Math.min(yesScale, 5)})`;
-        yesBtn.style.zIndex = 1000;
+        yesBtn.style.zIndex = 1500; // Match No button
 
         // 5. No Button Shrink
         if (clickCount > 3) {
-            const noScale = Math.max(0.1, 1 - (clickCount * 0.1));
+            const noScale = Math.max(0.2, 1 - (clickCount * 0.1)); // Don't get too small (0.2 min)
             noBtn.style.transform += ` scale(${noScale})`;
         }
     });
@@ -298,21 +338,74 @@ function startQuestion() {
 function spawnFloatingText(text) {
     const el = document.createElement('div');
     el.innerText = text;
-    el.className = 'pop-text'; // Use standard prop
+    el.className = 'pop-text';
 
-    // Random Position on Screen
-    // Ensure it doesn't spawn off-screen
-    const x = Math.random() * (window.innerWidth - 200); // Subtract roughly width of box
-    const y = Math.random() * (window.innerHeight - 100);
-
-    el.style.left = `${Math.max(20, x)}px`;
-    el.style.top = `${Math.max(20, y)}px`;
-
+    // Initial invisible append to measure size
+    el.style.opacity = '0';
     document.body.appendChild(el);
+
+    const width = el.offsetWidth;
+    const height = el.offsetHeight;
+
+    // Get exclusion zone (The main card/content area)
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const excludeWidth = Math.min(600, window.innerWidth * 0.8);
+    const excludeHeight = Math.min(500, window.innerHeight * 0.6);
+
+    const excludeLeft = centerX - (excludeWidth / 2);
+    const excludeRight = centerX + (excludeWidth / 2);
+    const excludeTop = centerY - (excludeHeight / 2);
+    const excludeBottom = centerY + (excludeHeight / 2);
+
+    let x, y, safe = false;
+    let attempts = 0;
+
+    // Viewport bounds (safe area)
+    const maxX = window.innerWidth - width - 20; // 20px padding
+    const maxY = window.innerHeight - height - 20;
+    const minX = 20;
+    const minY = 20;
+
+    while (!safe && attempts < 50) {
+        // Random position within safe bounds
+        x = Math.random() * (maxX - minX) + minX;
+        y = Math.random() * (maxY - minY) + minY;
+
+        // Check collision with center box
+        // We add some buffer to the exclusion zone to avoid being right on edge
+        if (x + width > excludeLeft - 20 && x < excludeRight + 20 &&
+            y + height > excludeTop - 20 && y < excludeBottom + 20) {
+            safe = false;
+        } else {
+            safe = true;
+        }
+        attempts++;
+    }
+
+    // If failed, just clamp to screen
+    x = Math.max(minX, Math.min(x, maxX));
+    y = Math.max(minY, Math.min(y, maxY));
+
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+    el.style.opacity = ''; // Remove opacity override so CSS animation works based on class
+
+    // Don't duplicate append, just keep it there
+    // But we need to make sure animation runs
+    // Since it's already in DOM with opacity 0, we might need to reset animation?
+    // Actually, CSS animation 'popUp' starts on mounting usually.
+    // Let's remove and re-append or just set opacity 1.
+    // The CSS animation uses @keyframes popUp which starts at 0%
+    // To restart it, we can re-add class or just rely on new element.
+    // Since we appended it with opacity 0, the animation might be running invisibly?
+    // Let's remove the style opacity
+    // And actually, the animation popUp controls opacity.
+    // So removing inline opacity style should let the animation take over.
 
     setTimeout(() => {
         el.remove();
-    }, 3000); // Match CSS animation duration
+    }, 3000);
 }
 
 function getNoText(count) {
@@ -327,7 +420,10 @@ function getNoText(count) {
         "Don't break my heart! 💔",
         "I'm actually crying now... 🌊"
     ];
-    return texts[Math.floor(Math.random() * texts.length)];
+    // Return texts sequentially based on count (1-based index)
+    // Ensure we don't go out of bounds (though click handler should prevent it)
+    const index = Math.min(count - 1, texts.length - 1);
+    return texts[index];
 }
 
 function startCelebration() {
