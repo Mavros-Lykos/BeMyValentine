@@ -205,7 +205,7 @@ function goToState4() {
 
         // 4. Show GIF
         gifContainer.classList.remove('hidden');
-        // Placeholder GIF - ideally replace with cute cat/puppy begging
+        // Placeholder GIF
         gifContainer.innerHTML = `<img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3hveGJ5bTh5bTh5bTh5bTh5bTh5bTh5bTh5/L95W4wv8nimb9E6F/giphy.gif" alt="Please" style="width: 100%; max-width: 200px; border-radius: 10px;">`;
 
         // 5. Grow GIF
@@ -219,8 +219,53 @@ function goToState4() {
 }
 
 function goToState5() {
-    console.log("SHE SAID YES!");
-    alert("YES! (Celebration Sequence in Next Commit)");
+    document.getElementById('questionScreen').classList.add('hidden');
+    const yesScreen = document.getElementById('yesScreen');
+    yesScreen.classList.remove('hidden');
+
+    // Message Logic
+    const gender = state.userData.gender;
+    const name = state.userData.from;
+    document.getElementById('yesMessage').innerText = `${gender === 'female' ? 'She' : 'He'} said YES 💍💖`;
+    document.getElementById('yesSubtext').innerText = `From ${name} ❤️`;
+
+    // Confetti
+    startConfetti();
+
+    // Share Elements
+    document.getElementById('shareAnswerBtn').addEventListener('click', shareAnswer);
+    document.getElementById('shareFriendBtn').addEventListener('click', () => {
+        window.open(window.location.origin + window.location.pathname, '_blank');
+    });
+}
+
+function startConfetti() {
+    const duration = 15 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+    function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+    const interval = setInterval(function () {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) return clearInterval(interval);
+
+        const particleCount = 50 * (timeLeft / duration);
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+    }, 250);
+}
+
+function shareAnswer() {
+    const text = `I said YES! 💖\nLook what ${state.userData.from} asked me!`;
+    const url = window.location.href;
+
+    if (navigator.share) {
+        navigator.share({ title: 'Be My Valentine?', text: text, url: url }).catch(console.error);
+    } else {
+        alert("Link copied to clipboard! Send it to them 💖");
+        navigator.clipboard.writeText(`${text}\n${url}`);
+    }
 }
 
 // Initialization

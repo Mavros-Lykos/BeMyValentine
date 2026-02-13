@@ -155,6 +155,16 @@ footer {
     transform: scale(1.1);
 }
 
+.link-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-main);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-top: 15px;
+}
+
 /* Wizard Styles */
 .wizard-container {
     width: 100%;
@@ -460,4 +470,24 @@ h2 {
 
 .gif-container {
     margin-top: 20px;
+}
+
+/* Yes Screen */
+.subtext-large {
+    font-size: 1.2rem;
+    color: var(--color-text-light);
+    margin-bottom: 30px;
+}
+
+.share-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    align-items: center;
+}
+
+.share-btn {
+    width: 100%;
+    max-width: 250px;
 }
