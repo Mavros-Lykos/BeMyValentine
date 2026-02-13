@@ -1,6 +1,6 @@
-// BeMyValentine - Version 1.2 (Structured & Gender Logic)
+// BeMyValentine - Version 1.3 (Exact Texts & Floating Animation)
 
-console.log('BeMyValentine V1.2 - Gender Overhaul 💖');
+console.log('BeMyValentine V1.3 - Final Polish 💖');
 
 // State & Config
 const state = {
@@ -8,7 +8,7 @@ const state = {
     userData: null
 };
 
-// GIF Collection (Cute & Funny)
+// GIF Collection
 const gifs = {
     please: "https://media1.tenor.com/m/m1m2N4j4qH4AAAAd/cheems-doge.gif",
     please2: "https://media1.tenor.com/m/Z4080sY3tXUAAAAd/doge-dog.gif",
@@ -53,14 +53,8 @@ musicToggle.addEventListener('click', () => {
     isMusicPlaying = !isMusicPlaying;
 });
 
-// Privacy Modal
-document.getElementById('privacyLink').addEventListener('click', (e) => {
-    e.preventDefault();
-    privacyModal.classList.remove('d-none');
-});
-document.getElementById('closeModalBtn').addEventListener('click', () => {
-    privacyModal.classList.add('d-none');
-});
+document.getElementById('privacyLink').addEventListener('click', (e) => { e.preventDefault(); privacyModal.classList.remove('d-none'); });
+document.getElementById('closeModalBtn').addEventListener('click', () => { privacyModal.classList.add('d-none'); });
 
 /* ===========================
    LOGIC
@@ -78,55 +72,42 @@ function init() {
         };
         startGreeting(state.userData);
     } else {
-        // Creator Mode - No overlay update needed
         document.getElementById('greetingScreen').classList.add('d-none');
         setupWizard();
     }
 }
 
-// Update Gendered Overlay (BEFORE init)
-// We need to check params immediately to update the Overlay text while it's still visible
 (function checkGenderForOverlay() {
     const params = new URLSearchParams(window.location.search);
     if (params.has('to') && params.has('from') && params.has('gender')) {
         const gender = params.get('gender');
         const overlayText = document.getElementById('overlayText');
-
-        if (gender === 'male') {
-            overlayText.innerHTML = "Hey Sir,<br>There is a mail for you... 📩";
-        } else {
-            overlayText.innerHTML = "Hey Ma'am,<br>There is a mail for you... 📩";
-        }
+        if (gender === 'male') overlayText.innerHTML = "Hey Sir,<br>There is a mail for you... 📩";
+        else overlayText.innerHTML = "Hey Ma'am,<br>There is a mail for you... 📩";
     }
 })();
 
 function setupWizard() {
     document.querySelectorAll('.form-outline').forEach((formOutline) => new mdb.Input(formOutline).init());
-
     let currentStep = 1;
     function showStep(step) {
         document.querySelectorAll('.wizard-step').forEach(el => { el.classList.add('d-none'); el.classList.remove('active-step'); });
         const active = document.querySelector(`.wizard-step[data-step="${step}"]`);
         active.classList.remove('d-none'); active.classList.add('active-step');
     }
-
     function handleNext() {
         if (currentStep === 1 && !document.getElementById('senderName').value.trim()) return alert("Enter your name 🐶");
         if (currentStep === 2 && !document.getElementById('recipientName').value.trim()) return alert("Who is the lucky one? 🥺");
         if (currentStep < 4) { currentStep++; showStep(currentStep); }
     }
-
     document.querySelectorAll('.next-step-btn').forEach(btn => btn.addEventListener('click', handleNext));
     document.querySelectorAll('.prev-step-btn').forEach(btn => btn.addEventListener('click', () => { if (currentStep > 1) { currentStep--; showStep(currentStep); } }));
-
     document.getElementById('generateBtn').addEventListener('click', () => {
         const sender = document.getElementById('senderName').value.trim();
         const recipient = document.getElementById('recipientName').value.trim();
         const gender = document.querySelector('input[name="gender"]:checked').value;
         const message = document.getElementById('customMessage').value.trim();
-
         if (!sender || !recipient) return alert("Fill everything pls!");
-
         const url = new URL(window.location.href);
         url.searchParams.set('from', sender);
         url.searchParams.set('to', recipient);
@@ -140,26 +121,21 @@ function startGreeting(data) {
     const screen = document.getElementById('greetingScreen');
     screen.classList.remove('d-none');
     document.getElementById('greetingText').textContent = `Hi ${data.to} 💕`;
-
     setTimeout(() => {
         document.getElementById('clickHint').classList.remove('d-none');
         document.body.addEventListener('click', startBuildUp1, { once: true });
     }, 2000);
 }
 
-// Build 1: "I've been wanting..."
 function startBuildUp1() {
     document.getElementById('greetingScreen').classList.add('d-none');
     document.getElementById('buildScreen1').classList.remove('d-none');
-
     document.body.addEventListener('click', startBuildUp2, { once: true });
 }
 
-// Build 2: "But I needed courage..."
 function startBuildUp2() {
     document.getElementById('buildScreen1').classList.add('d-none');
     document.getElementById('buildScreen2').classList.remove('d-none');
-
     document.body.addEventListener('click', startChat, { once: true });
 }
 
@@ -167,7 +143,6 @@ function startChat() {
     document.getElementById('buildScreen2').classList.add('d-none');
     document.getElementById('chatScreen').classList.remove('d-none');
     const container = document.getElementById('chatContainer');
-
     const messages = [
         { text: "Hewwo... 🥺", side: "left" },
         { text: "Can I ask something?", side: "right" },
@@ -175,7 +150,6 @@ function startChat() {
         { text: state.userData.msg || "You mean the world to me.", side: "right" },
         { text: "So...", side: "left" }
     ];
-
     let delay = 300;
     messages.forEach((msg, i) => {
         setTimeout(() => {
@@ -184,7 +158,6 @@ function startChat() {
             bubble.innerText = msg.text;
             container.appendChild(bubble);
             container.scrollTop = container.scrollHeight;
-
             if (i === messages.length - 1) {
                 setTimeout(() => {
                     document.getElementById('chatHint').classList.remove('d-none');
@@ -205,29 +178,46 @@ function startQuestion() {
     const gifContainer = document.getElementById('pleaseGifContainer');
     let clickCount = 0;
 
+    // Reset GIF Container
+    gifContainer.innerHTML = `<img src="${gifs.please}" id="reactionGif" class="rounded shadow-4-strong d-none" style="width: 200px; height: 200px; object-fit: cover; transition: all 0.5s ease;">`;
+    const reactionGif = document.getElementById('reactionGif');
+
     noBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         clickCount++;
-        const x = (Math.random() - 0.5) * 200;
-        const y = (Math.random() - 0.5) * 150;
+
+        // 1. Random Movement
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const x = (Math.random() - 0.5) * (windowWidth * 0.6); // Keep somewhat central but chaotic
+        const y = (Math.random() - 0.5) * (windowHeight * 0.6);
         noBtn.style.transform = `translate(${x}px, ${y}px)`;
 
+        // 2. Show GIF & Grow
         gifContainer.classList.remove('d-none');
         gifContainer.classList.add('d-flex');
+        reactionGif.classList.remove('d-none');
 
         let gifUrl = gifs.please;
         if (clickCount > 2) gifUrl = gifs.please2;
-        if (clickCount > 4) gifUrl = gifs.crying;
-        if (clickCount > 7) gifUrl = gifs.cryingHard;
+        if (clickCount > 5) gifUrl = gifs.crying;
+        if (clickCount > 8) gifUrl = gifs.cryingHard;
+        reactionGif.src = gifUrl;
 
-        gifContainer.innerHTML = `<img src="${gifUrl}" class="rounded shadow-4-strong" style="width: 200px; height: 200px; object-fit: cover;">
-            <p class="mt-2 fw-bold text-danger fade-in-scale">${getNoText(clickCount)}</p>`;
+        // UNLIMITED GROWTH
+        const scale = 1 + (clickCount * 0.2);
+        reactionGif.style.transform = `scale(${scale})`;
 
-        const yesScale = 1 + (clickCount * 0.3);
-        yesBtn.style.transform = `scale(${Math.min(yesScale, 4)})`;
-        yesBtn.style.zIndex = 100;
+        // 3. Floating Random Text
+        spawnFloatingText(getNoText(clickCount));
 
-        if (clickCount > 4) {
+        // 4. Yes Button Grow
+        const yesScale = 1 + (clickCount * 0.4);
+        yesBtn.style.transform = `scale(${Math.min(yesScale, 5)})`;
+        yesBtn.style.zIndex = 1000;
+
+        // 5. No Button Shrink
+        if (clickCount > 3) {
             const noScale = Math.max(0.1, 1 - (clickCount * 0.1));
             noBtn.style.transform += ` scale(${noScale})`;
         }
@@ -236,9 +226,39 @@ function startQuestion() {
     yesBtn.addEventListener('click', startCelebration);
 }
 
+function spawnFloatingText(text) {
+    const el = document.createElement('div');
+    el.innerText = text;
+    el.classList.add('pop-text');
+
+    // Random Position
+    const x = Math.random() * 80 + 10; // 10% to 90% width
+    const y = Math.random() * 80 + 10; // 10% to 90% height
+    el.style.left = `${x}%`;
+    el.style.top = `${y}%`;
+
+    document.body.appendChild(el);
+
+    // Cleanup
+    setTimeout(() => {
+        el.remove();
+    }, 2000);
+}
+
 function getNoText(count) {
-    const texts = ["Pls? 🥺", "Am chimken? 🍗", "Much sad... 🐕", "Wow. Very heartbreak. 💔", "Such mean. 😭", "I call police 🚓", "Why u do dis? 🥺"];
-    return texts[Math.min(count - 1, texts.length - 1)];
+    const texts = [
+        "Please 🥺",
+        "Are you sure? 💔",
+        "Think carefully… 🤔",
+        "This is a limited-time offer. ⏳",
+        "Non-refundable emotional investment. 📉",
+        "I already practiced telling my mom 😭",
+        "But we'd look so cute together! 🧸",
+        "Don't break my heart! 💔",
+        "I'm actually crying now... 🌊"
+    ];
+    // Randomly pick a text from the specific list
+    return texts[Math.floor(Math.random() * texts.length)];
 }
 
 function startCelebration() {
@@ -252,11 +272,12 @@ function startCelebration() {
     document.getElementById('yesSubtext').innerText = ` - ${name} ❤️`;
 
     startConfetti();
+    document.querySelectorAll('.pop-text').forEach(el => el.remove()); // Cleanup floating texts
 
     document.getElementById('shareAnswerBtn').addEventListener('click', () => {
         const text = `I said YES to ${state.userData.from}! 💖`;
         const url = window.location.href;
-        if (navigator.share) navigator.share({ title: 'Cheems Valentine', text: text, url: url });
+        if (navigator.share) navigator.share({ title: 'Valentine', text: text, url: url });
         else { alert('Link copied! 💌'); navigator.clipboard.writeText(`${text}\n${url}`); }
     });
 }
