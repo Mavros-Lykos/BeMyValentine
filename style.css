@@ -491,3 +491,53 @@ h2 {
     width: 100%;
     max-width: 250px;
 }
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    animation: fadeIn 0.3s;
+}
+
+.modal-content {
+    max-width: 400px;
+    padding: 2rem;
+    text-align: center;
+}
+
+.modal-content h2 {
+    margin-bottom: 15px;
+}
+
+.modal-content p {
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+/* Footer Links */
+.footer-links {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.footer-links a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: var(--color-accent);
+}

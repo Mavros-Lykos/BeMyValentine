@@ -9,6 +9,7 @@ const wizardContainer = document.getElementById('customizationWizard');
 const greetingScreen = document.getElementById('greetingScreen');
 const bgMusic = document.getElementById('bgMusic');
 const musicToggle = document.getElementById('musicToggle');
+const privacyModal = document.getElementById('privacyModal');
 
 // State Management
 const state = {
@@ -28,6 +29,18 @@ musicToggle.addEventListener('click', () => {
         musicToggle.innerHTML = '🔊';
     }
     isMusicPlaying = !isMusicPlaying;
+});
+
+// Privacy Modal Logic
+document.getElementById('privacyLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    privacyModal.classList.remove('hidden');
+    privacyModal.style.display = 'flex';
+});
+
+document.getElementById('closeModalBtn').addEventListener('click', () => {
+    privacyModal.classList.add('hidden');
+    privacyModal.style.display = 'none';
 });
 
 // Wizard Logic
