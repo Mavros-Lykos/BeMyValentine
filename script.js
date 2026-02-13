@@ -1,75 +1,88 @@
-// BeMyValentine V2 Core Logic
+// BeMyValentine MDB Refactor
 
-console.log('BeMyValentine V2 Initialized 💖');
+console.log('BeMyValentine V2 MDB Initialized 💖');
 
-// Core Elements
-const app = document.getElementById('app');
-const mainContainer = document.getElementById('mainContainer');
+// State Management
+const state = {
+    params: new URLSearchParams(window.location.search),
+    userData: null
+};
+
+// DOM Elements
 const wizardContainer = document.getElementById('customizationWizard');
 const greetingScreen = document.getElementById('greetingScreen');
 const bgMusic = document.getElementById('bgMusic');
 const musicToggle = document.getElementById('musicToggle');
 const privacyModal = document.getElementById('privacyModal');
 
-// State Management
-const state = {
-    currentScreen: 'init',
-    params: new URLSearchParams(window.location.search),
-    userData: null
-};
-
-// Audio Handling
+// Audio Logic
 let isMusicPlaying = false;
 musicToggle.addEventListener('click', () => {
     if (isMusicPlaying) {
         bgMusic.pause();
         musicToggle.innerHTML = '🎵';
     } else {
-        bgMusic.play().catch(e => console.log("Audio play failed", e));
+        bgMusic.play().catch(e => console.log("Audio play failed (interaction needed)", e));
         musicToggle.innerHTML = '🔊';
     }
     isMusicPlaying = !isMusicPlaying;
 });
 
-// Privacy Modal Logic
+// Privacy Modal
 document.getElementById('privacyLink').addEventListener('click', (e) => {
     e.preventDefault();
-    privacyModal.classList.remove('hidden');
-    privacyModal.style.display = 'flex';
+    privacyModal.classList.remove('d-none');
 });
-
 document.getElementById('closeModalBtn').addEventListener('click', () => {
-    privacyModal.classList.add('hidden');
-    privacyModal.style.display = 'none';
+    privacyModal.classList.add('d-none');
 });
 
 // Wizard Logic
 function setupWizard() {
+    // Initialize MDB Inputs (Floating labels need initialization sometimes, but basic MDB works with classes)
+    document.querySelectorAll('.form-outline').forEach((formOutline) => {
+        new mdb.Input(formOutline).init();
+    });
+
     let currentStep = 1;
     const totalSteps = 4;
 
     function showStep(step) {
         document.querySelectorAll('.wizard-step').forEach(el => {
-            el.classList.add('hidden');
-            el.classList.remove('active');
+            el.classList.add('d-none');
+            el.classList.remove('active-step');
         });
         const activeStep = document.querySelector(`.wizard-step[data-step="${step}"]`);
-        activeStep.classList.remove('hidden');
-        setTimeout(() => activeStep.classList.add('active'), 10);
+        activeStep.classList.remove('d-none');
+        activeStep.classList.add('active-step'); // For any custom animations
+
+        // Auto focus logic
+        const input = activeStep.querySelector('input, textarea');
+        if (input) setTimeout(() => input.focus(), 100);
     }
 
-    document.querySelectorAll('.next-step-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (currentStep === 1 && !document.getElementById('senderName').value.trim()) return alert("Please enter your name! 🥺");
-            if (currentStep === 2 && !document.getElementById('recipientName').value.trim()) return alert("Please enter their name! 💖");
+    function validateAndNext() {
+        if (currentStep === 1) {
+            const name = document.getElementById('senderName').value.trim();
+            if (!name) return alert("Please enter your name! 🥺");
+        }
+        if (currentStep === 2) {
+            const name = document.getElementById('recipientName').value.trim();
+            if (!name) return alert("Please enter their name! 💖");
+        }
 
-            if (currentStep < totalSteps) {
-                currentStep++;
-                showStep(currentStep);
-            }
-        });
+        if (currentStep < totalSteps) {
+            currentStep++;
+            showStep(currentStep);
+        }
+    }
+
+    // Next Buttons
+    document.querySelectorAll('.next-step-btn').forEach(btn => {
+        btn.addEventListener('click', validateAndNext);
     });
 
+    // Prev Buttons
     document.querySelectorAll('.prev-step-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             if (currentStep > 1) {
@@ -79,11 +92,28 @@ function setupWizard() {
         });
     });
 
+    // Enter Key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const activeStep = document.querySelector('.wizard-step:not(.d-none)');
+            if (activeStep && !wizardContainer.classList.contains('d-none')) {
+                const input = document.activeElement;
+                if (input && input.tagName === 'INPUT') {
+                    e.preventDefault();
+                    validateAndNext();
+                }
+            }
+        }
+    });
+
+    // Generate Button
     document.getElementById('generateBtn').addEventListener('click', () => {
-        const sender = document.getElementById('senderName').value;
-        const recipient = document.getElementById('recipientName').value;
+        const sender = document.getElementById('senderName').value.trim();
+        const recipient = document.getElementById('recipientName').value.trim();
         const gender = document.querySelector('input[name="gender"]:checked').value;
-        const message = document.getElementById('customMessage').value;
+        const message = document.getElementById('customMessage').value.trim();
+
+        if (!sender || !recipient) return alert("Please fill in all fields!");
 
         const url = new URL(window.location.href);
         url.searchParams.set('from', sender);
@@ -95,58 +125,46 @@ function setupWizard() {
     });
 }
 
-// State 1: Greeting Logic
+// State 1: Greeting
 function setupGreeting(data) {
-    if (greetingScreen) {
-        greetingScreen.classList.remove('hidden');
-        const greetingText = document.getElementById('greetingText');
-        const hint = document.getElementById('clickHint');
+    greetingScreen.classList.remove('d-none');
+    document.getElementById('greetingText').textContent = `Hi ${data.to} 💕`;
 
-        greetingText.textContent = `Hi ${data.to} 💕`;
+    // Try playing audio
+    bgMusic.volume = 0.5;
+    bgMusic.play().then(() => {
+        musicToggle.innerHTML = '🔊';
+        isMusicPlaying = true;
+    }).catch(e => console.log("Autoplay blocked usually"));
 
-        // Audio attempt
-        bgMusic.volume = 0.5;
-        bgMusic.play().then(() => {
-            musicToggle.innerHTML = '🔊';
-            isMusicPlaying = true;
-        }).catch(() => console.log("Audio waiting for interaction"));
-
-        // Timer
-        setTimeout(() => {
-            hint.classList.remove('hidden');
-            document.body.addEventListener('click', goToState2, { once: true });
-        }, 2500);
-    }
+    setTimeout(() => {
+        document.getElementById('clickHint').classList.remove('d-none');
+        document.body.addEventListener('click', goToBuildState, { once: true });
+    }, 2000);
 }
 
-function goToState2() {
-    greetingScreen.classList.add('hidden');
-
+function goToBuildState() {
+    greetingScreen.classList.add('d-none');
     const buildScreen = document.getElementById('buildScreen');
+    buildScreen.classList.remove('d-none');
+
     const msg1 = document.getElementById('buildMsg1');
     const msg2 = document.getElementById('buildMsg2');
     const hint = document.getElementById('buildHint');
 
-    if (buildScreen) {
-        buildScreen.classList.remove('hidden');
-
-        // Sequence
-        setTimeout(() => msg1.classList.remove('hidden'), 500);
-        setTimeout(() => msg2.classList.remove('hidden'), 2500);
-
-        // Hint
-        setTimeout(() => {
-            hint.classList.remove('hidden');
-            document.body.addEventListener('click', goToState3, { once: true });
-        }, 4500);
-    }
+    setTimeout(() => msg1.classList.remove('d-none'), 500);
+    setTimeout(() => msg2.classList.remove('d-none'), 2500);
+    setTimeout(() => {
+        hint.classList.remove('d-none');
+        document.body.addEventListener('click', goToChatState, { once: true });
+    }, 4500);
 }
 
-function goToState3() {
-    document.getElementById('buildScreen').classList.add('hidden');
+function goToChatState() {
+    document.getElementById('buildScreen').classList.add('d-none');
     const chatScreen = document.getElementById('chatScreen');
+    chatScreen.classList.remove('d-none');
     const chatContainer = document.getElementById('chatContainer');
-    chatScreen.classList.remove('hidden');
 
     const messages = [
         { text: "You know something? 🥺", side: "left" },
@@ -156,7 +174,7 @@ function goToState3() {
         { text: "So I was thinking…", side: "left" }
     ];
 
-    let delay = 500;
+    let delay = 300;
     messages.forEach((msg, i) => {
         setTimeout(() => {
             const bubble = document.createElement('div');
@@ -167,86 +185,74 @@ function goToState3() {
 
             if (i === messages.length - 1) {
                 setTimeout(() => {
-                    document.getElementById('chatHint').classList.remove('hidden');
-                    document.body.addEventListener('click', goToState4, { once: true });
+                    document.getElementById('chatHint').classList.remove('d-none');
+                    document.body.addEventListener('click', goToQuestionState, { once: true });
                 }, 1000);
             }
         }, delay);
-        delay += 2000;
+        delay += 1500;
     });
 }
 
-function goToState4() {
-    document.getElementById('chatScreen').classList.add('hidden');
-    const questionScreen = document.getElementById('questionScreen');
-    questionScreen.classList.remove('hidden');
+function goToQuestionState() {
+    document.getElementById('chatScreen').classList.add('d-none');
+    document.getElementById('questionScreen').classList.remove('d-none');
 
     const noBtn = document.getElementById('noBtn');
-    const yesBtn = document.getElementById('yesBtn');
-    const gifContainer = document.getElementById('pleaseGifContainer');
-
-    // No Button Logic
-    let noClickCount = 0;
+    let clickCount = 0;
+    const texts = ["Are you sure? 😢", "Really? 🥺", "Don't do this 😭", "I'm gonna cry...", "Heartbroken 💔"];
 
     noBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        noClickCount++;
-        const texts = [
-            "Are you sure? 😢",
-            "Really sure? 🥺",
-            "Think again! 😭",
-            "Last chance! 💔",
-            "You're breaking my heart...",
-            "I'm gonna cry...",
-            "Pls dont do this...",
-            "I already told my mom!"
-        ];
+        clickCount++;
 
-        // 1. Move Button Randomly
-        const x = (Math.random() - 0.5) * 150;
-        const y = (Math.random() - 0.5) * 150;
-        noBtn.style.transform = `translate(${x}px, ${y}px)`;
+        // Random Position
+        const x = (Math.random() - 0.5) * 200;
+        const y = (Math.random() - 0.5) * 200;
+        noBtn.style.transform = `translate(${x}px, ${y}px) scale(${1 - clickCount * 0.1})`;
 
-        // 2. Change Text
-        if (noClickCount <= texts.length) {
-            noBtn.innerText = texts[noClickCount - 1] || "Okay fine... 😭";
+        if (clickCount <= texts.length) {
+            noBtn.innerText = texts[clickCount - 1];
         }
 
-        // 3. Shrink Button
-        const scale = Math.max(0.5, 1 - (noClickCount * 0.1));
-        noBtn.style.transform += ` scale(${scale})`;
+        // Show GIF
+        const gifContainer = document.getElementById('pleaseGifContainer');
+        gifContainer.classList.remove('d-none');
+        gifContainer.classList.add('d-flex');
+        gifContainer.innerHTML = `<img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3hveGJ5bTh5bTh5bTh5bTh5bTh5bTh5bTh5/L95W4wv8nimb9E6F/giphy.gif" class="rounded shadow-4" style="max-width: 200px">`;
 
-        // 4. Show GIF
-        gifContainer.classList.remove('hidden');
-        // Placeholder GIF
-        gifContainer.innerHTML = `<img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3hveGJ5bTh5bTh5bTh5bTh5bTh5bTh5bTh5/L95W4wv8nimb9E6F/giphy.gif" alt="Please" style="width: 100%; max-width: 200px; border-radius: 10px;">`;
+        // Make Yes button bigger
+        const yesBtn = document.getElementById('yesBtn');
+        const currentScale = 1 + (clickCount * 0.2);
+        yesBtn.style.transform = `scale(${currentScale})`;
+    });
 
-        // 5. Grow GIF
-        if (noClickCount > 2) {
-            const gifScale = 1 + (noClickCount * 0.1);
-            gifContainer.querySelector('img').style.transform = `scale(${Math.min(gifScale, 2)})`;
+    document.getElementById('yesBtn').addEventListener('click', goToYesState);
+}
+
+function goToYesState() {
+    document.getElementById('questionScreen').classList.add('d-none');
+    document.getElementById('yesScreen').classList.remove('d-none');
+
+    const gender = state.userData.gender;
+    const from = state.userData.from;
+    document.getElementById('yesMessage').innerText = `${gender === 'female' ? 'She' : 'He'} said YES 💍💖`;
+    document.getElementById('yesSubtext').innerText = `From ${from} ❤️`;
+
+    startConfetti();
+
+    document.getElementById('shareAnswerBtn').addEventListener('click', () => {
+        if (navigator.share) {
+            navigator.share({
+                title: 'Be My Valentine?',
+                text: `I said YES! 💖\nLook what ${from} asked me!`,
+                url: window.location.href
+            });
+        } else {
+            alert('URL copied to clipboard!');
         }
     });
 
-    yesBtn.addEventListener('click', goToState5);
-}
-
-function goToState5() {
-    document.getElementById('questionScreen').classList.add('hidden');
-    const yesScreen = document.getElementById('yesScreen');
-    yesScreen.classList.remove('hidden');
-
-    // Message Logic
-    const gender = state.userData.gender;
-    const name = state.userData.from;
-    document.getElementById('yesMessage').innerText = `${gender === 'female' ? 'She' : 'He'} said YES 💍💖`;
-    document.getElementById('yesSubtext').innerText = `From ${name} ❤️`;
-
-    // Confetti
-    startConfetti();
-
-    // Share Elements
-    document.getElementById('shareAnswerBtn').addEventListener('click', shareAnswer);
     document.getElementById('shareFriendBtn').addEventListener('click', () => {
         window.open(window.location.origin + window.location.pathname, '_blank');
     });
@@ -256,37 +262,19 @@ function startConfetti() {
     const duration = 15 * 1000;
     const animationEnd = Date.now() + duration;
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-
-    function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-
     const interval = setInterval(function () {
         const timeLeft = animationEnd - Date.now();
         if (timeLeft <= 0) return clearInterval(interval);
-
         const particleCount = 50 * (timeLeft / duration);
-        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 } }));
     }, 250);
-}
-
-function shareAnswer() {
-    const text = `I said YES! 💖\nLook what ${state.userData.from} asked me!`;
-    const url = window.location.href;
-
-    if (navigator.share) {
-        navigator.share({ title: 'Be My Valentine?', text: text, url: url }).catch(console.error);
-    } else {
-        alert("Link copied to clipboard! Send it to them 💖");
-        navigator.clipboard.writeText(`${text}\n${url}`);
-    }
 }
 
 // Initialization
 function init() {
     const params = state.params;
     if (params.has('to') && params.has('from')) {
-        // Greeting Mode
-        if (wizardContainer) wizardContainer.remove();
+        wizardContainer.classList.add('d-none');
         state.userData = {
             to: params.get('to'),
             from: params.get('from'),
@@ -294,12 +282,8 @@ function init() {
             msg: params.get('msg')
         };
         setupGreeting(state.userData);
-        console.log("Rendering Greeting Mode");
     } else {
-        // Wizard Mode
-        if (greetingScreen) greetingScreen.remove();
         setupWizard();
-        console.log("Rendering Customization Mode");
     }
 }
 
