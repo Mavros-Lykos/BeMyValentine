@@ -1,6 +1,6 @@
-// BeMyValentine - Version 1.3 (Exact Texts & Floating Animation)
+// BeMyValentine - Version 1.4 (Fixed Floating Texts)
 
-console.log('BeMyValentine V1.3 - Final Polish 💖');
+console.log('BeMyValentine V1.4 - Visibility Fix 💖');
 
 // State & Config
 const state = {
@@ -178,7 +178,6 @@ function startQuestion() {
     const gifContainer = document.getElementById('pleaseGifContainer');
     let clickCount = 0;
 
-    // Reset GIF Container
     gifContainer.innerHTML = `<img src="${gifs.please}" id="reactionGif" class="rounded shadow-4-strong d-none" style="width: 200px; height: 200px; object-fit: cover; transition: all 0.5s ease;">`;
     const reactionGif = document.getElementById('reactionGif');
 
@@ -186,14 +185,14 @@ function startQuestion() {
         e.stopPropagation();
         clickCount++;
 
-        // 1. Random Movement
+        // 1. Move Button
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
-        const x = (Math.random() - 0.5) * (windowWidth * 0.6); // Keep somewhat central but chaotic
+        const x = (Math.random() - 0.5) * (windowWidth * 0.6);
         const y = (Math.random() - 0.5) * (windowHeight * 0.6);
         noBtn.style.transform = `translate(${x}px, ${y}px)`;
 
-        // 2. Show GIF & Grow
+        // 2. GIF Logic
         gifContainer.classList.remove('d-none');
         gifContainer.classList.add('d-flex');
         reactionGif.classList.remove('d-none');
@@ -204,12 +203,13 @@ function startQuestion() {
         if (clickCount > 8) gifUrl = gifs.cryingHard;
         reactionGif.src = gifUrl;
 
-        // UNLIMITED GROWTH
         const scale = 1 + (clickCount * 0.2);
         reactionGif.style.transform = `scale(${scale})`;
 
-        // 3. Floating Random Text
-        spawnFloatingText(getNoText(clickCount));
+        // 3. SPAWN FLOATING TEXT (The Crucial Part)
+        const text = getNoText(clickCount);
+        console.log("Spawning text:", text); // Debug
+        spawnFloatingText(text);
 
         // 4. Yes Button Grow
         const yesScale = 1 + (clickCount * 0.4);
@@ -229,20 +229,21 @@ function startQuestion() {
 function spawnFloatingText(text) {
     const el = document.createElement('div');
     el.innerText = text;
-    el.classList.add('pop-text');
+    el.className = 'pop-text'; // Use standard prop
 
-    // Random Position
-    const x = Math.random() * 80 + 10; // 10% to 90% width
-    const y = Math.random() * 80 + 10; // 10% to 90% height
-    el.style.left = `${x}%`;
-    el.style.top = `${y}%`;
+    // Random Position on Screen
+    // Ensure it doesn't spawn off-screen
+    const x = Math.random() * (window.innerWidth - 200); // Subtract roughly width of box
+    const y = Math.random() * (window.innerHeight - 100);
+
+    el.style.left = `${Math.max(20, x)}px`;
+    el.style.top = `${Math.max(20, y)}px`;
 
     document.body.appendChild(el);
 
-    // Cleanup
     setTimeout(() => {
         el.remove();
-    }, 2000);
+    }, 3000); // Match CSS animation duration
 }
 
 function getNoText(count) {
@@ -257,7 +258,6 @@ function getNoText(count) {
         "Don't break my heart! 💔",
         "I'm actually crying now... 🌊"
     ];
-    // Randomly pick a text from the specific list
     return texts[Math.floor(Math.random() * texts.length)];
 }
 
@@ -272,7 +272,7 @@ function startCelebration() {
     document.getElementById('yesSubtext').innerText = ` - ${name} ❤️`;
 
     startConfetti();
-    document.querySelectorAll('.pop-text').forEach(el => el.remove()); // Cleanup floating texts
+    document.querySelectorAll('.pop-text').forEach(el => el.remove());
 
     document.getElementById('shareAnswerBtn').addEventListener('click', () => {
         const text = `I said YES to ${state.userData.from}! 💖`;
